@@ -1,11 +1,3 @@
-/*const pattern = new Uint8Array([
-    255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-]);*/
 const pattern = new Uint8Array([176, 173, 1, 0, 1, 255, 255, 255]);
 const pattern2 = new Uint8Array([176, 173, 1, 0, 1]);
 
@@ -15,23 +7,19 @@ let lastList = [];
 let lastQuantities = [];
 let itemsData = {};
 let selected_slot;
-let collection = [];
 let slots = [];
 let id_list = [];
 
 let dlcFile = false;
 
 window.onload = async () => {
-    //Load json files into global variables
     readJsonFiles();
     const fileSelector = document.getElementById("savefile");
     fileSelector.addEventListener("change", async (event) => {
-        // no file selected to read
         if (document.getElementById("savefile").value === null) {
             alert("No file selected");
             return;
         }
-
         await readFile();
         updateSlotDropdown(getNames(file_read));
         document.getElementById("slot_selector").onchange = e => {
@@ -39,37 +27,6 @@ window.onload = async () => {
         };
     });
 }
-
-/*function reload() {
-    readFile();
-    const { slots, id_list } = fetchInventory();
-    if (id_list.length > lastList.length) {
-        console.log("difference");
-        id_list.forEach(itemId => {
-            if (!lastList.includes(itemId)) {
-                const elt = document.getElementById(itemId);
-                if (elt) {
-                    console.log("vraiment");
-                    const name = elt.lastChild.value;
-                    console.log(name);
-                    elt.classList.remove("disabledCard");
-                    elt.firstChild.alt = name;
-                    elt.firstChild.src = `assets/img/items/${sanitizeImgName(name)}.webp`;
-                    elt.childNodes[1].innerText = name;
-                }
-            }
-        });
-        lastList = id_list;
-    }
-
-    const itemsQuantities = findItemQuantities(slots[selected_slot]);
-    if (JSON.stringify(itemsQuantities) != JSON.stringify(lastQuantities)) {
-        lastQuantities = itemsQuantities;
-        for (let i = 0; i < itemsQuantities.length; i++) {
-            document.getElementById("quantifiable" + i).innerText = itemsQuantities[i];
-        }
-    }
-}*/
 
 function readFile() {
     return new Promise((resolve, reject) => {
@@ -87,7 +44,6 @@ function readFile() {
             resolve();
         };
         reader.onerror = e => {
-            // error occurred
             console.error("Error : " + e.type);
             reject();
         };
@@ -146,7 +102,6 @@ function start() {
     selected_slot = document.querySelector("#slot_selector option:checked").value;
     fetchInventory();
     calculate();
-    //setInterval(reload, 5000);
 }
 
 function sanitizeImgName(name) {
@@ -164,7 +119,7 @@ function sanitizeImgName(name) {
 
 async function calculate() {
 
-    //Fetch collectibles quantities
+    // Fetch collectibles quantities
     const itemsQuantities = findItemQuantities(slots[selected_slot]);
     lastQuantities = itemsQuantities;
     let globalCounter = 0;
@@ -188,7 +143,7 @@ async function calculate() {
     }
     regionsToInsert += "</div></dd>";
 
-    //Generate regions blocks
+    // Generate regions blocks
     Object.keys(itemsData).forEach(region => {
         let zonesToInsert = "";
         let regionCounter = 0;
@@ -198,15 +153,20 @@ async function calculate() {
             let counter = 0;
             Object.keys(itemsData[region][zone]).forEach(itemKey => {
                 if (id_list.includes(itemKey)) {
-                    //Item found
                     counter++;
-                    itemsToInsert += `<div class='itemCard' id='${itemKey}'><a target="_blank" href='https://eldenring.wiki.fextralife.com/${sanitizeURL(itemsData[region][zone][itemKey].name)}'>
-                    <img alt="${itemsData[region][zone][itemKey].name}" src="assets/img/items/${sanitizeImgName(itemsData[region][zone][itemKey].name)}.webp"/>
+                    itemsToInsert += `<div class='itemCard' id='${itemKey}'>
+                      <a
+                        target="_blank"
+                        href='https://eldenring.wiki.fextralife.com/${sanitizeURL(itemsData[region][zone][itemKey].name)}'
+                        >
+                        <img
+                            alt="${itemsData[region][zone][itemKey].name}"
+                            src="assets/img/items/${sanitizeImgName(itemsData[region][zone][itemKey].name)}.webp"
+                        />
                     <p>${itemsData[region][zone][itemKey].name}</p>
                     </a></div>`;
                 }
                 else {
-                    //Item not found
                     itemsToInsert += `<div class='itemCard disabledCard' id='${itemKey}'>
                     <div class='tooltip'>Hint<div class='tooltipText'>${itemsData[region][zone][itemKey].hint}</div></div>
                     <img alt="${itemsData[region][zone][itemKey].type}" src="assets/img/hints/${itemsData[region][zone][itemKey].type}.png"/>
@@ -216,7 +176,7 @@ async function calculate() {
                     </div>`;
                 }
             });
-            //Quantifiable icons
+            // Quantifiable icons
             let icons = "<span class='iconList'>";
             quantifiableItems.forEach(item => {
                 const n = item.places.reduce((cnt, val) => (val === zone ? cnt + 1 : cnt), 0);
@@ -227,7 +187,7 @@ async function calculate() {
             icons += "</span>";
 
             const zoneTotal = Object.keys(itemsData[region][zone]).length;
-            //Zone insertion
+            // Zone insertion
             regionCounter += counter;
             regionTotal += zoneTotal;
 
@@ -240,7 +200,7 @@ async function calculate() {
             zonesToInsert += `<dt class='zoneTitle closed'>${zone}${icons}<span class='counter'>(${counter} / ${Object.keys(itemsData[region][zone]).length}) ${zonePctg}%</span></dt><dd class='closed'><div class="itemList">${itemsToInsert}</div></dd>`;
         });
 
-        //Region insertion
+        // Region insertion
         globalCounter += regionCounter;
         globalTotal += regionTotal;
 
@@ -254,16 +214,13 @@ async function calculate() {
     });
     regionsToInsert += "</dl>";
 
-    //Global completion
+    // Global completion
     const completion = `<h2>Completion: ${Math.floor(globalCounter / globalTotal * 100)}%</h2>`;
 
-    //Collection link
-    //const collectionLink = "<div><a href='#' onclick='showCollection()'>- See your collection -</a></div>";
+    // Assemble final HTML page
+    document.getElementById("resultSection").innerHTML = completion + notFoundCheckbox + regionsToInsert;
 
-    //Final insertion
-    document.getElementById("resultSection").innerHTML = completion + /*collectionLink + */notFoundCheckbox + regionsToInsert;
-
-    //Add collapsible feature
+    // Add collapsible feature
     const elts = document.getElementsByTagName("dt");
     for (let elt of elts) {
         elt.onclick = toggleDisplay;
@@ -296,8 +253,6 @@ async function readJsonFiles() {
         itemsData = { ...itemsData1, ...itemsData2 };
         res = await fetch("assets/json/collectibles.json");
         quantifiableItems = await res.json();
-        res = await fetch("assets/json/collection.json");
-        collection = await res.json();
     }
     catch (e) {
         console.error(e);
@@ -399,96 +354,4 @@ function sanitizeURL(name) {
     if (name === "Gauntlets")
         return "Chain+Gauntlets";
     return name.replaceAll(" +1", "").replaceAll(" +2", "").replaceAll(" (1)", "").replaceAll(" (2)", "").replaceAll("[", "(").replaceAll("]", ")").replaceAll(" ", "+");
-}
-
-function showCollection() {
-    const collectionScreen = document.createElement("div");
-    collectionScreen.id = "collectionScreen";
-    document.getElementsByTagName("body")[0].appendChild(collectionScreen);
-    document.getElementsByTagName("body")[0].style.overflow = "hidden";
-    collectionPage(0);
-}
-
-function hideCollection() {
-    const collectionScreen = document.createElement("div");
-    collectionScreen.id = "collectionScreen";
-    document.getElementById("collectionScreen").remove();
-    document.getElementsByTagName("body")[0].style.overflow = "auto";
-}
-
-function collectionPage(pageNumber) {
-    const collectionScreen = document.getElementById("collectionScreen");
-    collectionScreen.innerHTML = "";
-
-    const header = document.createElement("div");
-    header.id = "collectionHeader";
-
-    const title = document.createElement("h2");
-    title.textContent = collection[pageNumber].name;
-    header.appendChild(title);
-
-    const buttonsDiv = document.createElement("div");
-    const buttonLeft = document.createElement("a");
-    const buttonCenter = document.createElement("a");
-    const buttonRight = document.createElement("a");
-    buttonLeft.href = "#";
-    buttonCenter.href = "#";
-    buttonRight.href = "#";
-    buttonLeft.textContent = "< Previous";
-    buttonCenter.textContent = "Close";
-    buttonRight.textContent = "Next >";
-    let previousPage = pageNumber - 1;
-    if (previousPage < 0) {
-        previousPage = collection.length - 1;
-    }
-    buttonLeft.onclick = () => collectionPage(previousPage);
-    buttonRight.onclick = () => collectionPage((pageNumber + 1) % collection.length);
-    buttonCenter.onclick = () => hideCollection();
-    buttonsDiv.appendChild(buttonLeft);
-    buttonsDiv.appendChild(buttonCenter);
-    buttonsDiv.appendChild(buttonRight);
-    header.appendChild(buttonsDiv);
-
-    collectionScreen.appendChild(header);
-
-    const main = document.createElement("div");
-    main.id = "collectionMain";
-    collection[pageNumber].items.forEach(itemList => {
-        const row = document.createElement("div");
-        row.className = "collectionItemList";
-        itemList.forEach(item => {
-            const itemInfos = searchItemInfos(item);
-            if (id_list.includes(item)) {
-                const elt = `<div class='itemCard'><a target="_blank" href='https://eldenring.wiki.fextralife.com/${sanitizeURL(itemInfos.name)}'>
-                <img alt="${itemInfos.name}" src="assets/img/items/${sanitizeImgName(itemInfos.name)}.webp"/>
-                <p>${itemInfos.name}</p>
-                </a></div>`;
-                row.innerHTML += elt;
-            }
-            else {
-                const elt = `<div class='itemCard disabledCard'>
-                    <div class='tooltip'>Hint<div class='tooltipText'>${itemInfos.hint}</div></div>
-                    <img alt="${itemInfos.type}" src="assets/img/hints/${itemInfos.type}.png"/>
-                    <p>??????????</p>
-                    <input type="hidden" value="${itemInfos.name}"/>
-                    <input type="hidden" value="${itemInfos.type}"/>
-                    </div>`;
-                row.innerHTML += elt;
-            }
-        });
-        main.appendChild(row);
-    });
-    collectionScreen.appendChild(main);
-}
-
-function searchItemInfos(itemId) {
-    const regions = Object.keys(itemsData);
-    for (let i = 0; i < regions.length; i++) {
-        const zones = Object.keys(itemsData[regions[i]]);
-        for (let j = 0; j < zones.length; j++) {
-            if (itemsData[regions[i]][zones[j]][itemId]) {
-                return itemsData[regions[i]][zones[j]][itemId];
-            }
-        }
-    }
 }
