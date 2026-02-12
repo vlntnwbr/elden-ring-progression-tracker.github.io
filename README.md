@@ -1,7 +1,15 @@
-# Elden Ring Progression Tracker
+# Elden Ring Progression Tracker (Enhanced)
+
+> [!IMPORTANT]
+> This tool tool forks [Elden Ring Progression Tracker](https://github.com/vlntnwbr/elden-ring-progression-tracker.github.io).
+> Most of the code, especially actually computing the progression based on savefiles is taken
+> has not been changed. This tool only modifies the item display.
+
+<details>
+<summary>Show original README contents</summary>
 
 - [Link to the web page](https://elden-ring-progression-tracker.github.io/)
-- [Report a problem](https://github.com/elden-ring-progression-tracker/elden-ring-progression-tracker.github.io/issues)
+- [Report a problem]
 
 Check your Elden Ring progression through the equipment and unique items found during the game.
 
@@ -27,10 +35,14 @@ Check your Elden Ring progression through the equipment and unique items found d
   - a merchant
   - a quest
   - a Teardrop Scarab
+
+</details>
   
 ## Credits
 
 - [Zidodelakarai](https://github.com/Zidodelakarai): Author of this tool
+- [Uinelj](https://github.com/Uinelj): Contributor to this tool (at the time of forking)
+- [BenoutAnastay](https://github.com/BenoitAnastay): Contributor to this tool (at the time of forking)
 - [CyberGiant7](https://github.com/CyberGiant7): Author of [Elden Ring Automatic Checklist](https://github.com/CyberGiant7/Elden-Ring-Automatic-Checklist) which inspired me this tool and from which I borrowed the inventory reading functions.
 - RainingChain and other contributors: Author of [this checklist](https://scripterswar.com/EldenRing/completion#) from which I fetched the items locations.
 - Contributors of the [Master Spreadsheet](https://docs.google.com/spreadsheets/d/1c7rIV3bBKDxP9ngixgigd7ZmczH3DYhDmMt8HY4ijV0/edit#gid=242218508) from which I took the items ids.
