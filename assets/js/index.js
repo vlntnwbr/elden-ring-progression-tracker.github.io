@@ -14,23 +14,43 @@ let dlcFile = false;
 
 window.onload = async () => {
     readJsonFiles();
-    const fileSelector = document.getElementById("savefile");
-    fileSelector.addEventListener("change", async (event) => {
-        if (document.getElementById("savefile").value === null) {
+    const params = new URLSearchParams(window.location.search);
+    const fileSelector = () => document.getElementById("savefile");
+    fileSelector().addEventListener("change", async (event) => {
+        let selector = fileSelector();
+        if (selector.value === null) {
             alert("No file selected");
             return;
         }
-        await readFile();
-        updateSlotDropdown(getNames(file_read));
-        document.getElementById("slot_selector").onchange = e => {
-            document.getElementById("calculate").style.display = "inline-block";
-        };
+        await readFile(selector.files[0]);
+        readSlots(params);
     });
 }
 
-function readFile() {
+function readSlots(params) {
+    updateSlotDropdown(getNames(file_read));
+    const selector = document.getElementById("slot_selector");
+    selector.onchange = e => {
+        document.getElementById("calculate").style.display = "inline-block";
+    };
+    const character = params.get("character");
+    if (character) {
+        console.log("Auto-Loading character", character);
+        const options = Array.from(selector.options);
+        const match = options.find(opt => opt.text.trim() === character);
+        if (match) {
+            selector.value = match.value;
+            selector.dispatchEvent(new Event("change"));
+        } else {
+            console.warn(`Can't find '${character}'`);
+        }
+    }
+}
+
+function readFile(savefile) {
     return new Promise((resolve, reject) => {
-        const file = document.getElementById("savefile").files[0];
+        console.log("Processing file:", savefile)
+        const file = savefile;
         const reader = new FileReader();
         reader.onload = e => {
             file_read = e.target.result;
