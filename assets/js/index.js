@@ -130,18 +130,18 @@ async function calculate() {
     globalTotal += totalItems;
 
     //Create toggleNotFoundItems checkbox
-    const notFoundCheckbox = "<input type='checkbox' id='notFound' onclick='toggleNotFoundItems(this.checked)'/><label for='notFound'>Display not found items</label>";
+    const notFoundCheckbox = `<div class="toggle-not-found"><input type="checkbox" id="notFound" onclick="toggleNotFoundItems(this.checked)"/><label for="notFound">Display not found items</label></div>`;
 
     //Generate collectibles HTML block
-    let regionsToInsert = `<dl><dt class='regionTitle closed'>Collectibles<span class='counter'>(${itemsFound} / ${totalItems})</span></dt><dd class='closed'><div class='itemList'>`;
+    let regionsToInsert = `<dl><dt class="regionTitle closed">Collectibles<span class="counter">(${itemsFound} / ${totalItems})</span></dt><dd class="closed"><div class="itemList">`;
     for (let i = 0; i < quantifiableItems.length; i++) {
-        regionsToInsert += `<div class='itemCard'>
+        regionsToInsert += `<div class="itemCard">
                     <img alt="${quantifiableItems[i].name}" src="assets/img/items/${quantifiableItems[i].name.replaceAll(":", "")}.png"/>
                     <p id="quantifiable${i}">${quantifiableItems[i].name}</p>
                     <p>${itemsQuantities[i]} / ${quantifiableItems[i].places.length}</p>
                     </div>`;
     }
-    regionsToInsert += "</div></dd>";
+    regionsToInsert += `</div></dd>`;
 
     // Generate regions blocks
     Object.keys(itemsData).forEach(region => {
@@ -154,10 +154,10 @@ async function calculate() {
             Object.keys(itemsData[region][zone]).forEach(itemKey => {
                 if (id_list.includes(itemKey)) {
                     counter++;
-                    itemsToInsert += `<div class='itemCard' id='${itemKey}'>
+                    itemsToInsert += `<div class="itemCard" id="${itemKey}">
                       <a
                         target="_blank"
-                        href='https://eldenring.wiki.fextralife.com/${sanitizeURL(itemsData[region][zone][itemKey].name)}'
+                        href="https://eldenring.wiki.fextralife.com/${sanitizeURL(itemsData[region][zone][itemKey].name)}"
                         >
                         <img
                             alt="${itemsData[region][zone][itemKey].name}"
@@ -167,8 +167,8 @@ async function calculate() {
                     </a></div>`;
                 }
                 else {
-                    itemsToInsert += `<div class='itemCard disabledCard' id='${itemKey}'>
-                    <div class='tooltip'>Hint<div class='tooltipText'>${itemsData[region][zone][itemKey].hint}</div></div>
+                    itemsToInsert += `<div class="itemCard disabledCard" id="${itemKey}">
+                    <div class="tooltip">Hint<div class="tooltipText">${itemsData[region][zone][itemKey].hint}</div></div>
                     <img alt="${itemsData[region][zone][itemKey].type}" src="assets/img/hints/${itemsData[region][zone][itemKey].type}.png"/>
                     <p>??????????</p>
                     <input type="hidden" value="${itemsData[region][zone][itemKey].name}"/>
@@ -177,14 +177,14 @@ async function calculate() {
                 }
             });
             // Quantifiable icons
-            let icons = "<span class='iconList'>";
+            let icons = `<span class="iconList">`;
             quantifiableItems.forEach(item => {
                 const n = item.places.reduce((cnt, val) => (val === zone ? cnt + 1 : cnt), 0);
                 for (let i = 0; i < n; i++) {
                     icons += `<img alt="${item.name}" title="${item.name}" src="assets/img/items/${item.name.replaceAll(":", "")}.png"/>`
                 }
             });
-            icons += "</span>";
+            icons += `</span>`;
 
             const zoneTotal = Object.keys(itemsData[region][zone]).length;
             // Zone insertion
@@ -197,7 +197,7 @@ async function calculate() {
                 zonePctg = 100;
             }
 
-            zonesToInsert += `<dt class='zoneTitle closed'>${zone}${icons}<span class='counter'>(${counter} / ${Object.keys(itemsData[region][zone]).length}) ${zonePctg}%</span></dt><dd class='closed'><div class="itemList">${itemsToInsert}</div></dd>`;
+            zonesToInsert += `<dt class="zoneTitle closed">${zone}${icons}<span class="counter">(${counter} / ${Object.keys(itemsData[region][zone]).length}) ${zonePctg}%</span></dt><dd class="closed"><div class="itemList">${itemsToInsert}</div></dd>`;
         });
 
         // Region insertion
@@ -210,9 +210,9 @@ async function calculate() {
             regionPctg = 100;
         }
 
-        regionsToInsert += `<dt class='regionTitle closed'>${region}<span class='counter'>(${regionCounter} / ${regionTotal}) ${regionPctg}%</span></dt><dd class='closed'><dl>${zonesToInsert}</dl></dd>`;
+        regionsToInsert += `<dt class="regionTitle closed">${region}<span class="counter">(${regionCounter} / ${regionTotal}) ${regionPctg}%</span></dt><dd class="closed"><dl>${zonesToInsert}</dl></dd>`;
     });
-    regionsToInsert += "</dl>";
+    regionsToInsert += `</dl>`;
 
     // Global completion
     const completion = `<h2>Completion: ${Math.floor(globalCounter / globalTotal * 100)}%</h2>`;
