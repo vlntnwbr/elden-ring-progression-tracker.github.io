@@ -6,9 +6,9 @@ let file_read = null;
 let lastList = [];
 let lastQuantities = [];
 let itemsData = {};
-let selected_slot;
+let selectedSlot;
 let slots = [];
-let id_list = [];
+let idList = [];
 
 let dlcFile = false;
 
@@ -34,7 +34,11 @@ function readFile() {
         const reader = new FileReader();
         reader.onload = e => {
             file_read = e.target.result;
-            if (!buffer_equal(file_read["slice"](0, 4), new Int8Array([66, 78, 68, 52]))) {
+            if (
+                !bufferEqual(
+                    file_read["slice"](0, 4),
+                    new Int8Array([66, 78, 68, 52]))
+            ) {
                 e.target.result = null;
                 document.getElementById("slot_select").style.display = "none";
                 alert("Insert a valid file");
@@ -51,7 +55,7 @@ function readFile() {
     });
 }
 
-function buffer_equal(buf1, buf2) {
+function bufferEqual(buf1, buf2) {
     if (buf1.byteLength !== buf2.byteLength) return false;
     const dv1 = new Int8Array(buf1);
     const dv2 = new Int8Array(buf2);
@@ -61,17 +65,19 @@ function buffer_equal(buf1, buf2) {
     return true;
 }
 
-function updateSlotDropdown(slot_name_list) {
+function updateSlotDropdown(slotNameList) {
     const select = document.getElementById("slot_select");
     select.innerHTML = `<strong>Select slot: </strong>
-          <select aria-label="Select slot" id="slot_selector">
-           <option hidden selected>Select the slot whose inventory you want to analyze</option>`;
+        <select aria-label="Select slot" id="slot_selector">
+        <option hidden selected>
+            Select the slot whose inventory you want to analyze
+        </option>`;
     const selector = select.getElementsByTagName("select")[0];
     for (let i = 0; i < 10; i++) {
-        if (slot_name_list[i] === "") {
+        if (slotNameList[i] === "") {
             selector.innerHTML += `<option value="${i}" disabled> - </option>`;
         } else {
-            selector.innerHTML += `<option value="${i}"> ${slot_name_list[i]} </option>`;
+            selector.innerHTML += `<option value="${i}"> ${slotNameList[i]} </option>`;
         }
     }
     select.style.display = "block";
@@ -79,27 +85,34 @@ function updateSlotDropdown(slot_name_list) {
 
 function getNames(file_read) {
     const decoder = new TextDecoder("utf-8");
-    const name1 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x1901d0e, 0x1901d0e + 32)))));
-    const name2 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x1901f5a, 0x1901f5a + 32)))));
-    const name3 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x19021a6, 0x19021a6 + 32)))));
-    const name4 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x19023f2, 0x19023f2 + 32)))));
-    const name5 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x190263e, 0x190263e + 32)))));
-    const name6 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x190288a, 0x190288a + 32)))));
-    const name7 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x1902ad6, 0x1902ad6 + 32)))));
-    const name8 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x1902d22, 0x1902d22 + 32)))));
-    const name9 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x1902f6e, 0x1902f6e + 32)))));
-    const name10 = decoder.decode(new Int8Array(Array.from(new Uint16Array(file_read.slice(0x19031ba, 0x19031ba + 32)))));
+    const _decode = (sliceStart, sliceStop, stopOffset = 32) => decoder.decode(
+        new Int8Array(Array.from(new Uint16Array(file_read.slice(
+            sliceStart,
+            sliceStop + stopOffset
+    )))));
 
-    const names = [name1, name2, name3, name4, name5, name6, name7, name8, name9, name10];
-    names.forEach((name, index) => {
-        names[index] = name.replaceAll("\x00", "");
-    });
+    const slotBytes = [
+        [0x1901d0e, 0x1901d0e],
+        [0x1901f5a, 0x1901f5a],
+        [0x19021a6, 0x19021a6],
+        [0x19023f2, 0x19023f2],
+        [0x190263e, 0x190263e],
+        [0x190288a, 0x190288a],
+        [0x1902ad6, 0x1902ad6],
+        [0x1902d22, 0x1902d22],
+        [0x1902f6e, 0x1902f6e],
+        [0x19031ba, 0x19031ba]
+    ];
+    const names = [];
+    slotBytes.forEach( ( slot ) => names.push(
+        _decode(slot[0], slot[1]).replaceAll("\x00", "")
+    ));
     return names;
 }
 
 function start() {
     document.getElementById("formSection").style.display = "none";
-    selected_slot = document.querySelector("#slot_selector option:checked").value;
+    selectedSlot = document.querySelector("#slot_selector option:checked").value;
     fetchInventory();
     calculate();
 }
@@ -120,26 +133,46 @@ function sanitizeImgName(name) {
 async function calculate() {
 
     // Fetch collectibles quantities
-    const itemsQuantities = findItemQuantities(slots[selected_slot]);
+    const itemsQuantities = findItemQuantities(slots[selectedSlot]);
     lastQuantities = itemsQuantities;
     let globalCounter = 0;
     let globalTotal = 0;
     const itemsFound = itemsQuantities.reduce((prev, cur) => prev + cur, 0);
-    const totalItems = quantifiableItems.reduce((prev, cur) => prev + cur.places.length, 0);
+    const totalItems = quantifiableItems.reduce(
+        (prev, cur) => prev + cur.places.length, 0
+    );
     globalCounter += itemsFound;
     globalTotal += totalItems;
 
     //Create toggleNotFoundItems checkbox
-    const notFoundCheckbox = `<div class="toggle-not-found"><input type="checkbox" id="notFound" onclick="toggleNotFoundItems(this.checked)"/><label for="notFound">Display not found items</label></div>`;
+    const notFoundCheckbox = `<div class="toggle-not-found">
+      <input
+        type="checkbox"
+        id="notFound"
+        onclick="toggleNotFoundItems(this.checked)"
+      />
+      <label for="notFound">Display not found items</label>
+    </div>`;
 
-    //Generate collectibles HTML block
-    let regionsToInsert = `<dl><dt class="regionTitle closed">Collectibles<span class="counter">(${itemsFound} / ${totalItems})</span></dt><dd class="closed"><div class="itemList">`;
+    // Generate collectibles HTML block
+    let regionsToInsert = `<dl>
+      <dt class="regionTitle closed">
+        Collectibles <span class="counter">
+          (${itemsFound} / ${totalItems})
+        </span>
+      </dt>
+      <dd class="closed">
+      <div class="itemList">`;
+
     for (let i = 0; i < quantifiableItems.length; i++) {
         regionsToInsert += `<div class="itemCard">
-                    <img alt="${quantifiableItems[i].name}" src="assets/img/items/${quantifiableItems[i].name.replaceAll(":", "")}.png"/>
-                    <p id="quantifiable${i}">${quantifiableItems[i].name}</p>
-                    <p>${itemsQuantities[i]} / ${quantifiableItems[i].places.length}</p>
-                    </div>`;
+          <img
+            alt="${quantifiableItems[i].name}"
+            src="assets/img/items/${quantifiableItems[i].name.replaceAll(":", "")}.png"
+          />
+          <p id="quantifiable${i}">${quantifiableItems[i].name}</p>
+          <p>${itemsQuantities[i]} / ${quantifiableItems[i].places.length}</p>
+          </div>`;
     }
     regionsToInsert += `</div></dd>`;
 
@@ -152,36 +185,58 @@ async function calculate() {
             let itemsToInsert = "";
             let counter = 0;
             Object.keys(itemsData[region][zone]).forEach(itemKey => {
-                if (id_list.includes(itemKey)) {
+                if (idList.includes(itemKey)) {
                     counter++;
                     itemsToInsert += `<div class="itemCard" id="${itemKey}">
                       <a
                         target="_blank"
-                        href="https://eldenring.wiki.fextralife.com/${sanitizeURL(itemsData[region][zone][itemKey].name)}"
-                        >
+                        href="https://eldenring.wiki.fextralife.com/${
+                            sanitizeURL(itemsData[region][zone][itemKey].name)
+                        }"
+                      >
                         <img
                             alt="${itemsData[region][zone][itemKey].name}"
-                            src="assets/img/items/${sanitizeImgName(itemsData[region][zone][itemKey].name)}.webp"
+                            src="assets/img/items/${sanitizeImgName(
+                                itemsData[region][zone][itemKey].name
+                            )}.webp"
                         />
-                    <p>${itemsData[region][zone][itemKey].name}</p>
-                    </a></div>`;
+                        <p>${itemsData[region][zone][itemKey].name}</p>
+                      </a>
+                    </div>`;
                 }
                 else {
                     itemsToInsert += `<div class="itemCard disabledCard" id="${itemKey}">
-                    <div class="tooltip">Hint<div class="tooltipText">${itemsData[region][zone][itemKey].hint}</div></div>
-                    <img alt="${itemsData[region][zone][itemKey].type}" src="assets/img/hints/${itemsData[region][zone][itemKey].type}.png"/>
+                      <div class="tooltip">
+                        Hint <div class="tooltipText">
+                          ${itemsData[region][zone][itemKey].hint}
+                      </div>
+                    </div>
+                    <img
+                      alt="${itemsData[region][zone][itemKey].type}"
+                      src="assets/img/hints/${itemsData[region][zone][itemKey].type}.png"
+                    />
                     <p>??????????</p>
-                    <input type="hidden" value="${itemsData[region][zone][itemKey].name}"/>
-                    <input type="hidden" value="${itemsData[region][zone][itemKey].type}"/>
+                    <input type="hidden" value="${
+                        itemsData[region][zone][itemKey].name
+                    }"/>
+                    <input type="hidden" value="${
+                        itemsData[region][zone][itemKey].type
+                    }"/>
                     </div>`;
                 }
             });
             // Quantifiable icons
             let icons = `<span class="iconList">`;
             quantifiableItems.forEach(item => {
-                const n = item.places.reduce((cnt, val) => (val === zone ? cnt + 1 : cnt), 0);
+                const n = item.places.reduce(
+                    (cnt, val) => ( val === zone ? cnt + 1 : cnt ), 0
+                );
                 for (let i = 0; i < n; i++) {
-                    icons += `<img alt="${item.name}" title="${item.name}" src="assets/img/items/${item.name.replaceAll(":", "")}.png"/>`
+                    icons += `<img
+                      alt="${item.name}"
+                      title="${item.name}"
+                      src="assets/img/items/${item.name.replaceAll(":", "")}.png"
+                    />`
                 }
             });
             icons += `</span>`;
@@ -197,7 +252,16 @@ async function calculate() {
                 zonePctg = 100;
             }
 
-            zonesToInsert += `<dt class="zoneTitle closed">${zone}${icons}<span class="counter">(${counter} / ${Object.keys(itemsData[region][zone]).length}) ${zonePctg}%</span></dt><dd class="closed"><div class="itemList">${itemsToInsert}</div></dd>`;
+            zonesToInsert += `<dt class="zoneTitle closed">
+              ${zone}${icons}<span class="counter">
+                (${counter} / ${
+                    Object.keys(itemsData[region][zone]).length
+                }) ${zonePctg}%
+              </span>
+            </dt>
+            <dd class="closed">
+              <div class="itemList">${itemsToInsert}</div>
+            </dd>`;
         });
 
         // Region insertion
@@ -210,15 +274,28 @@ async function calculate() {
             regionPctg = 100;
         }
 
-        regionsToInsert += `<dt class="regionTitle closed">${region}<span class="counter">(${regionCounter} / ${regionTotal}) ${regionPctg}%</span></dt><dd class="closed"><dl>${zonesToInsert}</dl></dd>`;
+        regionsToInsert += `<dt class="regionTitle closed">
+          ${region}<span class="counter">
+            (${regionCounter} / ${regionTotal}) ${regionPctg}%
+          </span>
+        </dt>
+        <dd class="closed">
+          <dl>${zonesToInsert}</dl>
+        </dd>`;
     });
     regionsToInsert += `</dl>`;
 
     // Global completion
-    const completion = `<h2>Completion: ${Math.floor(globalCounter / globalTotal * 100)}%</h2>`;
+    const completion = `<h2>Completion: ${
+        Math.floor(globalCounter / globalTotal * 100)}%
+    </h2>`;
 
     // Assemble final HTML page
-    document.getElementById("resultSection").innerHTML = completion + notFoundCheckbox + regionsToInsert;
+    document.getElementById("resultSection").innerHTML = (
+        completion
+        + notFoundCheckbox
+        + regionsToInsert
+    );
 
     // Add collapsible feature
     const elts = document.getElementsByTagName("dt");
@@ -230,14 +307,16 @@ async function calculate() {
 function fetchInventory() {
     const saves_array = new Uint8Array(file_read);
     slots = get_slot_ls(saves_array);
-    const inventory = Array.from(getInventory(slots[selected_slot]));
-    id_list = split(inventory, dlcFile ? 8 : 16);
-    id_list.forEach((raw_id, index) => (id_list[index] = getIdReversed(raw_id).toUpperCase()));
-    lastList = id_list;
+    const inventory = Array.from(getInventory(slots[selectedSlot]));
+    idList = split(inventory, dlcFile ? 8 : 16);
+    idList.forEach((raw_id, index) => (
+        idList[index] = getIdReversed(raw_id).toUpperCase())
+    );
+    lastList = idList;
 }
 
 function toggleDisplay() {
-    const elt = this.nextSibling;
+    const elt = this.nextElementSibling;
     this.classList.toggle("closed");
     this.classList.toggle("opened");
     elt.classList.toggle("closed");
@@ -278,18 +357,29 @@ function getInventory(slot) {
     if (!index) {
         index = 0;
         do {
-            index += subfinder(slot.subarray(index), pattern2) + pattern2.byteLength + 3;
+            index += subfinder(
+                slot.subarray(index), pattern2
+            ) + pattern2.byteLength + 3;
         } while (slot[index - 3] != 0 && index);
         dlcFile = true;
     }
-    index1 = subfinder(slot.subarray(index, slot.byteLength), new Uint8Array(50).fill(0)) + index + 6;
+    index1 = subfinder(
+        slot.subarray(index, slot.byteLength),
+        new Uint8Array(50).fill(0)
+    ) + index + 6;
     console.log(slot.subarray(index, index1));
     return slot.subarray(index, index1);
 }
 
 function subfinder(mylist, pattern) {
     for (let i = 0; i < mylist.byteLength; i++) {
-        if (mylist[i] === pattern[0] && buffer_equal(mylist.subarray(i, i + pattern.byteLength), pattern)) return i;
+        if (
+            mylist[i] === pattern[0]
+            && bufferEqual(
+                mylist.subarray(i, i + pattern.byteLength),
+                pattern
+            )
+        ) return i;
     }
 }
 
@@ -313,7 +403,11 @@ function getIdReversed(id) {
 
 function decimalToHex(d, padding) {
     let hex = Number(d).toString(16);
-    padding = typeof padding === "undefined" || padding === null ? (padding = 2) : padding;
+    padding = (
+        typeof padding === "undefined" || padding === null
+        ? (padding = 2)
+        : padding
+    );
 
     while (hex.length < padding) {
         hex = "0" + hex;
@@ -326,9 +420,12 @@ function findItemQuantities(slot) {
     for (let i = 0; i < slot.byteLength - 4; i++) {
         for (let j = 0; j < quantifiableItems.length; j++) {
             const item = quantifiableItems[j];
-            if (slot[i] === item.id[0] && slot[i + 1] === item.id[1] && slot[i + 2] === item.id[2] && slot[i + 3] === 176) {
-                result[j] = slot[i + 4];
-            }
+            if (
+                slot[i] === item.id[0]
+                && slot[i + 1] === item.id[1]
+                && slot[i + 2] === item.id[2]
+                && slot[i + 3] === 176
+            ) { result[j] = slot[i + 4];}
         }
     }
     return result;
@@ -339,7 +436,9 @@ function toggleNotFoundItems(value) {
     for (let card of elts) {
         if (value) {
             const name = card.getElementsByTagName("input")[0].value;
-            card.getElementsByTagName("img")[0].src = `assets/img/items/${sanitizeImgName(name)}.webp`;
+            card.getElementsByTagName("img")[0].src = `assets/img/items/${
+                sanitizeImgName(name)
+            }.webp`;
             card.getElementsByTagName("p")[0].innerText = name;
         }
         else {
@@ -353,5 +452,12 @@ function toggleNotFoundItems(value) {
 function sanitizeURL(name) {
     if (name === "Gauntlets")
         return "Chain+Gauntlets";
-    return name.replaceAll(" +1", "").replaceAll(" +2", "").replaceAll(" (1)", "").replaceAll(" (2)", "").replaceAll("[", "(").replaceAll("]", ")").replaceAll(" ", "+");
+    return name
+        .replaceAll(" +1", "")
+        .replaceAll(" +2", "")
+        .replaceAll(" (1)", "")
+        .replaceAll(" (2)", "")
+        .replaceAll("[", "(")
+        .replaceAll("]", ")")
+        .replaceAll(" ", "+");
 }
