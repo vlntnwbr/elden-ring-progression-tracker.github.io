@@ -2,41 +2,94 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Elden Ring Progression</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="description" content="Check your Elden Ring progression!" />
-    <meta name="author" content="Zidodelakaraye" />
-
-    <link rel="icon" href="assets/img/favicon.ico" />
-    <link href="assets/css/styles.css" type="text/css" rel="stylesheet" />
-
-    <script type="text/javascript" src="assets/js/index.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elden Ring Progression</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="application-name" content="Elden Ring Progression Tracker" />
+  <meta name="description" content="Check your Elden Ring progression and hunt down missing items on your way to lordship!" />
+  <meta name="author" content="Valentin Weber" />
+  <meta name="keywords" content="Gaming, Elden Ring, FromSoft, Soulslike, Dark Souls, Progression Tracking," />
+  <link rel="license" href="https://www.gnu.org/licenses/gpl-3.0-standalone.html">
+  <link rel="icon" href="assets/img/favicon.ico" />
+  <link href="assets/css/styles.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="assets/js/index.js"></script>
 </head>
-
 <body>
-    <div class="logoContainer">
-        <img src="assets/img/logo.png" alt="Elden Ring Logo" class="logo" />
-        <h1 class="title">Completion Tracker</h1>
+
+  <header>
+    <img src="assets/img/logo.png" alt="Elden Ring Logo" class="logo" />
+    <h1 class="title">Completion Tracker</h1>
+  </header>
+  
+  <main>
+    <div id="formSection">
+      <form>
+        <label for="savefile">
+          <p><strong>Upload Elden Ring save file</strong></p>
+        </label>
+        <input type="file" id="savefile" accept=".sl2, .co2" />
+        <p id="hint-for-savefile">
+          Usually located in<br />
+          C:/Users/<i>yourName</i>/<wbr>AppData/Roaming/EldenRing<wbr>/<i>aNumber</i>/ER0000.sl2
+        </p>
+      </form>
+      <form style="display: none" id="characterSelectForm">
+        <label for="characterSelectInput">
+          <p><strong>Select Character</strong></p>
+        </label>
+        <select aria-label="slot-select" id="characterSelectInput">
+          <!--
+            Populated by list of characters read from the savefile
+           -->
+        </select>
+      </form>
     </div>
-    <div class="container">
-        <div id="formSection">
-            <div>
-                <label><strong>Upload Elden Ring save file :</strong></label>
-                <input type="file" id="savefile" accept=".sl2, .co2" />
-                <p>(Usually located in C:/Users/<i>yourName</i>/AppData/Roaming/EldenRing/<i>aNumber</i>/ER0000.sl2)</p>
-            </div>
-            <div style="display: none" id="slot_select"></div>
-            <button style="display: none" type="button" name="calculate" id="calculate" onclick="start()">Start</button>
-        </div>
-        <div id="resultSection"></div>
+
+    <div id="resultSection" style="display: none">
+      <h2>
+        <span id="characterName" data-character="null">
+          Character Name
+        </span>
+        <span class="subheading" id="globalCompletion">
+          <!-- Populated with the percentage of overall completion progress -->
+        </span>
+      </h2>
+      <div id="completionProgress">  
+        <!-- Populated with the savefile analysis results
+         TODO: make this the <dl> wrapper
+        -->
+      </div>
     </div>
-    <div class="footer">
-        <a href="https://github.com/vlntnwbr/elden-ring-progression-tracker.github.io"
-            target="_blank">See project
-            on GitHub</a>
-    </div>
+
+  </main>
+  
+  <footer>
+    <a target="_blank"
+      href="https://github.com/vlntnwbr/elden-ring-progression-tracker.github.io"
+    >
+      See project on GitHub
+    </a>
+  </footer>
+  
+  <aside
+    id="viewModifiers"
+    role="toolbar"
+    aria-label="view-modifiers"
+    style="display: none;"
+  >
+    <form>
+      <input type="checkbox" id="notFound" onclick="toggleNotFoundItems(this.checked)" />
+      <label for="notFound">Show Missing Item Details</label>
+      <input type="checkbox" id="showOnlynotFound" onclick="toggleShowOnlyNotFoundItems(this.checked)" />
+      <label for="showOnlynotFound">Show only Missing Items</label>
+      <input type="checkbox" id="expandSections" onclick="toggleDetailsOpen(this.checked)" />
+      <label for="expandSections">Expand All</label>
+    </form>
+  </aside>
+
+
+
 </body>
 
 </html>

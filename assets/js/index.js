@@ -1,78 +1,298 @@
-const pattern = new Uint8Array([176, 173, 1, 0, 1, 255, 255, 255]);
-const pattern2 = new Uint8Array([176, 173, 1, 0, 1]);
+const _VERSION = {
+    major: 2,
+    patch: 0,
+    minor: 0
+}
 
-let quantifiableItems;
-let file_read = null;
-let lastList = [];
-let lastQuantities = [];
-let itemsData = {};
-let selectedSlot;
+const PATTERN = new Uint8Array([176, 173, 1, 0, 1, 255, 255, 255]);
+const PATTERN_FALLBACK = new Uint8Array([176, 173, 1, 0, 1]);
+
+let COLLECTIBLES_DATA;          // Global Store for assets/data/collectibles.json
+let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
+let SAVEFILE_CONTENT = null;    // Global Store for the binary contents of the savefile
+
+// TODO evaluate the need for these
 let slots = [];
 let idList = [];
-
 let dlcFile = false;
 
-window.onload = async () => {
-    readJsonFiles();
-    const params = new URLSearchParams(window.location.search);
-    const fileSelector = () => document.getElementById("savefile");
-    fileSelector().addEventListener("change", async (event) => {
-        let selector = fileSelector();
-        if (selector.value === null) {
-            alert("No file selected");
-            return;
-        }
-        await readFile(selector.files[0]);
-        readSlots(params);
-    });
+/*
+TODO: if only one save slot is read from the file, automatically calculate progression
+TODO: Add the quantities of found items to the itemCard
+TODO: Fix the icon-lists for Collectibles other than Cracked Pot
+*/
+
+/*---
+    HTML Templates filled by the result of savefile analysis
+---*/
+
+/** Get select option for a character slot from a savefile. */
+const CharacterSelectionOption = (value, idx) => (
+    value ? `<option value=${idx}>${value}</option>` : null
+);
+
+/**
+ * Creates a details element with progress tracking.
+ * @param {string} kind - Whether the entry is for a zone or a region. Zone details are
+ *                        of class `zoneTitle` and its collapsible section is of class
+ *                        `itemList`. Region details are of class `regionTitle`.
+ * @param {string} name - The display name of the entry. Used in the details summary.
+ *                        For the name `Collectibles` the collapsible section is of
+ *                        class `itemList`.
+ * @param {number} found - The number of found items. Used in the details summary.
+ * @param {number} total - The total number of items. Used in the details summary.
+ * @param {string} details - The HTML content to display as the collapsible details.
+ * @param {string} [icons] - Optional HTML icons for Collectibles in area. Used in the
+ *                           details summary.
+ * @returns {string} An HTML string for a collapsible section summarizing items.
+ */
+const ItemSummarySection = (
+    kind, name, found, total, details, icons
+) => (`
+    <details
+      id="${name.replace(" ", "-").toLowerCase()}-${found}-${total}"
+      class="${found == total ? "completed" : "in-progress"}"
+    >
+      <summary class="${kind}Title">
+        <${kind === "zone" ? "h4" : "h3"} class="sectionHeading">
+          ${name}
+          ${icons ? `<span class="iconList">${icons}</span>` : ""}
+          <span class="counter">${found}/${total} • ${
+            total != 0 ? Math.floor((found / total) * 100) : 100
+          }%
+        </${kind === "zone" ? "h4" : "h3"}>
+      </summary>
+      <div ${kind === "zone" || name === "Collectibles" ? `class="itemList"`: ""}>
+        ${details}
+      </div>
+    </details>
+`);
+
+/**
+ * Generates a styled <article class="itemCard"> for Elden Ring items.
+ * 
+ * @param {string} name - Item Name. Used as the article heading. This value is exposed
+ *                        via `itemCard.dataset.itemName`.
+ * @param {string} type - The type of the item. A value starting with `collectible`
+ *                        receives special treatment. The value is used as an additional
+ *                        class. All others are wrapped in a link to the Elden Ring 
+ *                        wiki. For these cards the type is used for determining the
+ *                        display image if an item is not `found`. The value is exposed
+ *                        via `itemCard.dataset.itemType`.
+ * @param {string} id - The unique identifier for the item card element
+ * @param {string} hint - For items of type `collectible` this value is displayed below
+ *                        the name. For all others it is used for displaying a text when
+ *                        hovering over the card of an item that was not found.
+ * @param {boolean} [found=true] - If an item was not found the link wrapping the card is
+ *                                 removed and the classes `disabledCard tooltip` are
+ *                                 added. Defaults to true to ensure correct asset
+ *                                 fetching for `collectible` cards.
+ * @param {string} [url=""] - Optional URL link to the item's wiki page. Used as `href`
+ *                            for the link wrapping cards of found items. Defaults to an
+ *                            empty string because `collectible` cards are not linked.
+ *                            If set it is exposed via `itemCard.dataset.itemWikiLink`.
+ * @returns {string} An HTML string representing the item card article element
+ */
+const ItemCard = (name, type, id, hint, found = true, url = "") => {
+    const isCollectible = (type.startsWith("collectible"));
+    return (
+    `<article
+      class="itemCard ${
+        isCollectible ? type : found ? '' : 'disabledCard tooltip'
+      }"
+      id="${id}"
+      data-item-name="${name}"
+      data-item-type="${type}"
+      ${url ? `data-item-wiki-link="${url}"`: ""}
+    >
+      ${!isCollectible && found ? `<a target="_blank" href="${url}">` : ''}
+      <img
+        alt="${found ? name : type}"
+        src="${Item.getImageAsset(name, type, found)}"
+      />
+      <h5>
+        ${found ? name : Item.NOT_FOUND_NAME}
+      </h5>
+      ${!isCollectible && !found ? `<div class="tooltip-text">${hint}</div>` : ``}
+      ${isCollectible ? `<p class="more-info">${hint}</p>` : ""}
+      ${!isCollectible && found ? `</a>` : ``}
+    </article>
+`)};
+
+/*---
+    Helpers for sanitizing Item Data for use in HTML
+---*/
+
+function sanitizeURL(name) {
+    if (name === "Gauntlets")
+        return "Chain+Gauntlets";
+    return name
+        .replaceAll(" +1", "")
+        .replaceAll(" +2", "")
+        .replaceAll(" (1)", "")
+        .replaceAll(" (2)", "")
+        .replaceAll("[", "(")
+        .replaceAll("]", ")")
+        .replaceAll(" ", "+");
 }
 
-function readSlots(params) {
-    updateSlotDropdown(getNames(file_read));
-    const selector = document.getElementById("slot_selector");
-    selector.onchange = e => {
-        document.getElementById("calculate").style.display = "inline-block";
-    };
-    const character = params.get("character");
-    if (character) {
-        console.log("Auto-Loading character", character);
-        const options = Array.from(selector.options);
-        const match = options.find(opt => opt.text.trim() === character);
-        if (match) {
-            selector.value = match.value;
-            selector.dispatchEvent(new Event("change"));
-        } else {
-            console.warn(`Can't find '${character}'`);
-        }
+function sanitizeImgName(name) {
+    if (name.includes("Bell Bearing")) {
+        return "Bell Bearing";
     }
+    if (name.includes("Note:")) {
+        return "Note";
+    }
+    let newName = name.replaceAll(":", "").replaceAll("?", "");
+    const index = newName.search(" \\[");
+    if (index > 0) newName = newName.substring(0, index);
+    return newName;
 }
 
-function readFile(savefile) {
-    return new Promise((resolve, reject) => {
-        console.log("Processing file:", savefile)
-        const file = savefile;
-        const reader = new FileReader();
-        reader.onload = e => {
-            file_read = e.target.result;
-            if (
-                !bufferEqual(
-                    file_read["slice"](0, 4),
-                    new Int8Array([66, 78, 68, 52]))
-            ) {
-                e.target.result = null;
-                document.getElementById("slot_select").style.display = "none";
-                alert("Insert a valid file");
-                reject();
-                return;
+/*---
+    Helpers for processing progression and compiling HTML description
+    list entries with cards for each item.
+---*/
+
+class Item {
+
+    // TODO add quantities
+    static NOT_FOUND_NAME = "??????????";
+    
+    constructor(key, item) {
+        this.key = key                   // value from json/data.json
+        this.name = item.name;           // value from json/data.json
+        this.type = item.type;           // value from json/data.json
+        this.hint = item.hint;           // value from json/data.json
+        this.multiple = item.multiple;   // value from json/data.json
+        this.found = idList.includes(key);
+        this.url = `https://eldenring.wiki.fextralife.com/${
+            sanitizeURL(this.name)
+        }`;
+        this._image = Item.getImageAsset(this.name, this.type, this.found);
+    }
+
+    static getImageAsset(name, type, found) {return `assets/img/${ found
+        ? `items/${sanitizeImgName(name)}.webp`
+        : `hints/${type}.png`
+    }`}
+
+    getHTML() { return ItemCard(
+        this.name, this.type, this.key, this.hint, this.found, this.url
+    )}
+}
+
+class Zone {
+
+    constructor(zoneTitle, zoneData) {
+        this.counter = 0;
+        this.total = 0;
+        this.title = zoneTitle;
+        this.itemsHTML = "";
+        this.iconList = this.getIconList();
+        Object.keys(zoneData).forEach(itemKey => {
+            const item = new Item(itemKey, zoneData[itemKey]);
+            this.total++;
+            if (item.found) this.counter++;
+            this.itemsHTML += item.getHTML();
+        })
+    }
+
+    getIconList() {
+        const icons = [];
+        COLLECTIBLES_DATA.forEach((item) => {
+            const n = item.places.reduce(
+                (count, location) => (
+                    location === this.title ? count + 1 : count
+                ), 0
+            );
+            for (let i = 0; i < n; i++) {
+                icons.push(`
+                <img
+                    alt="${item.name}"
+                    title="${item.name}"
+                    src="${Item.getImageAsset(item.name, "", true)}"
+                />`);
             }
-            resolve();
-        };
-        reader.onerror = e => {
-            console.error("Error : " + e.type);
-            reject();
-        };
-        reader.readAsArrayBuffer(file);
-    });
+        });
+        return icons;
+    }
+
+    getHTML() { return ItemSummarySection(
+        "zone",
+        this.title,
+        this.counter,
+        this.total,
+        this.itemsHTML,
+        this.iconList.join("")
+    )}
+}
+
+class Region {
+
+    constructor (regionTitle, regionData) {
+        this.counter = 0;
+        this.total = 0;
+        this.title = regionTitle;
+        this.regionsHTML = [];
+        // this.iconList = ""
+        Object.keys(regionData).forEach(zoneTitle => {
+            const zone = new Zone(zoneTitle, regionData[zoneTitle]);
+            this.counter += zone.counter;
+            this.total += zone.total
+            this.regionsHTML.push(zone.getHTML())
+        });
+    }
+
+    getHTML() { return ItemSummarySection(
+        "region",
+        this.title,
+        this.counter,
+        this.total,
+        `${this.regionsHTML.join("")}`
+    )}
+}
+
+function getCollectibles(character) {
+    const itemsQuantities = findItemQuantities(slots[character]);
+    const itemsFound = itemsQuantities.reduce((prev, cur) => prev + cur, 0);
+    const totalItems = COLLECTIBLES_DATA.reduce(
+        (prev, cur) => prev + cur.places.length, 0
+    );
+    let itemsHTML = "";
+    COLLECTIBLES_DATA.forEach((item, idx) => {
+        const found = itemsQuantities[idx];
+        const total = item.places.length
+        itemsHTML += ItemCard(
+            item.name,
+            `collectible${found === total ? "-completed": ""}`,
+            `collectible-${idx}`,
+            `${found}/${total}`
+        )
+    })
+    const entry = ItemSummarySection(
+        "region", "Collectibles", itemsFound, totalItems, itemsHTML
+    )
+    return [itemsFound, totalItems, entry]
+}
+
+/*--
+    File Reading functions
+--*/
+
+async function readJsonFiles() {
+    try {
+        let res = await fetch("assets/json/data.json");
+        const itemsData1 = await res.json();
+        let res2 = await fetch("assets/json/dlcData.json");
+        const itemsData2 = await res2.json();
+        ITEM_DATA = { ...itemsData1, ...itemsData2 };
+        res = await fetch("assets/json/collectibles.json");
+        COLLECTIBLES_DATA = await res.json();
+    }
+    catch (e) {
+        console.error(e);
+    }
 }
 
 function bufferEqual(buf1, buf2) {
@@ -85,28 +305,46 @@ function bufferEqual(buf1, buf2) {
     return true;
 }
 
-function updateSlotDropdown(slotNameList) {
-    const select = document.getElementById("slot_select");
-    select.innerHTML = `<strong>Select slot: </strong>
-        <select aria-label="Select slot" id="slot_selector">
-        <option hidden selected>
-            Select the slot whose inventory you want to analyze
-        </option>`;
-    const selector = select.getElementsByTagName("select")[0];
-    for (let i = 0; i < 10; i++) {
-        if (slotNameList[i] === "") {
-            selector.innerHTML += `<option value="${i}" disabled> - </option>`;
-        } else {
-            selector.innerHTML += `<option value="${i}"> ${slotNameList[i]} </option>`;
-        }
-    }
-    select.style.display = "block";
+/** Read the Elden Ring Save file uploaded by the user
+ * 
+ * This populates the <file_read> global variable
+ * 
+ * After populating the global variable it checks that value against an array
+ * to validate if the savefile is valid. It resets the global variable.
+ * It is awaited in the onChange handler of the file selector
+*/
+function readFile(savefile) {
+    return new Promise((resolve, reject) => {
+        const file = savefile;
+        const reader = new FileReader();
+        reader.onload = e => {  // executed when reader has read the file
+            SAVEFILE_CONTENT = e.target.result;
+            if (
+                !bufferEqual(
+                    SAVEFILE_CONTENT["slice"](0, 4),
+                    new Int8Array([66, 78, 68, 52]))
+            ) {
+                e.target.result = null;
+                document.getElementById("characterSelectForm").style.display = "none";
+                alert("Insert a valid file");
+                reject();
+                return;
+            }
+            resolve();
+        };
+        reader.onerror = e => {
+            console.error("Error : " + e.type);
+            reject();
+        };
+        reader.readAsArrayBuffer(file);  // read the uploaded file.
+    });
 }
 
-function getNames(file_read) {
+/** Read the character names from the slots in the savefile */
+function getNames(fromSavefile) {
     const decoder = new TextDecoder("utf-8");
     const _decode = (sliceStart, sliceStop, stopOffset = 32) => decoder.decode(
-        new Int8Array(Array.from(new Uint16Array(file_read.slice(
+        new Int8Array(Array.from(new Uint16Array(fromSavefile.slice(
             sliceStart,
             sliceStop + stopOffset
     )))));
@@ -130,232 +368,15 @@ function getNames(file_read) {
     return names;
 }
 
-function start() {
-    document.getElementById("formSection").style.display = "none";
-    selectedSlot = document.querySelector("#slot_selector option:checked").value;
-    fetchInventory();
-    calculate();
-}
-
-function sanitizeImgName(name) {
-    if (name.includes("Bell Bearing")) {
-        return "Bell Bearing";
-    }
-    if (name.includes("Note:")) {
-        return "Note";
-    }
-    let newName = name.replaceAll(":", "").replaceAll("?", "");
-    const index = newName.search(" \\[");
-    if (index > 0) newName = newName.substring(0, index);
-    return newName;
-}
-
-async function calculate() {
-
-    // Fetch collectibles quantities
-    const itemsQuantities = findItemQuantities(slots[selectedSlot]);
-    lastQuantities = itemsQuantities;
-    let globalCounter = 0;
-    let globalTotal = 0;
-    const itemsFound = itemsQuantities.reduce((prev, cur) => prev + cur, 0);
-    const totalItems = quantifiableItems.reduce(
-        (prev, cur) => prev + cur.places.length, 0
-    );
-    globalCounter += itemsFound;
-    globalTotal += totalItems;
-
-    //Create toggleNotFoundItems checkbox
-    const notFoundCheckbox = `<div class="toggle-not-found">
-      <input
-        type="checkbox"
-        id="notFound"
-        onclick="toggleNotFoundItems(this.checked)"
-      />
-      <label for="notFound">Display not found items</label>
-    </div>`;
-
-    // Generate collectibles HTML block
-    let regionsToInsert = `<dl>
-      <dt class="regionTitle closed">
-        Collectibles <span class="counter">
-          (${itemsFound} / ${totalItems})
-        </span>
-      </dt>
-      <dd class="closed">
-      <div class="itemList">`;
-
-    for (let i = 0; i < quantifiableItems.length; i++) {
-        regionsToInsert += `<div class="itemCard">
-          <img
-            alt="${quantifiableItems[i].name}"
-            src="assets/img/items/${quantifiableItems[i].name.replaceAll(":", "")}.png"
-          />
-          <p id="quantifiable${i}">${quantifiableItems[i].name}</p>
-          <p>${itemsQuantities[i]} / ${quantifiableItems[i].places.length}</p>
-          </div>`;
-    }
-    regionsToInsert += `</div></dd>`;
-
-    // Generate regions blocks
-    Object.keys(itemsData).forEach(region => {
-        let zonesToInsert = "";
-        let regionCounter = 0;
-        let regionTotal = 0;
-        Object.keys(itemsData[region]).forEach(zone => {
-            let itemsToInsert = "";
-            let counter = 0;
-            Object.keys(itemsData[region][zone]).forEach(itemKey => {
-                if (idList.includes(itemKey)) {
-                    counter++;
-                    itemsToInsert += `<div class="itemCard" id="${itemKey}">
-                      <a
-                        target="_blank"
-                        href="https://eldenring.wiki.fextralife.com/${
-                            sanitizeURL(itemsData[region][zone][itemKey].name)
-                        }"
-                      >
-                        <img
-                            alt="${itemsData[region][zone][itemKey].name}"
-                            src="assets/img/items/${sanitizeImgName(
-                                itemsData[region][zone][itemKey].name
-                            )}.webp"
-                        />
-                        <p>${itemsData[region][zone][itemKey].name}</p>
-                      </a>
-                    </div>`;
-                }
-                else {
-                    itemsToInsert += `<div class="itemCard disabledCard" id="${itemKey}">
-                      <div class="tooltip">
-                        Hint <div class="tooltipText">
-                          ${itemsData[region][zone][itemKey].hint}
-                      </div>
-                    </div>
-                    <img
-                      alt="${itemsData[region][zone][itemKey].type}"
-                      src="assets/img/hints/${itemsData[region][zone][itemKey].type}.png"
-                    />
-                    <p>??????????</p>
-                    <input type="hidden" value="${
-                        itemsData[region][zone][itemKey].name
-                    }"/>
-                    <input type="hidden" value="${
-                        itemsData[region][zone][itemKey].type
-                    }"/>
-                    </div>`;
-                }
-            });
-            // Quantifiable icons
-            let icons = `<span class="iconList">`;
-            quantifiableItems.forEach(item => {
-                const n = item.places.reduce(
-                    (cnt, val) => ( val === zone ? cnt + 1 : cnt ), 0
-                );
-                for (let i = 0; i < n; i++) {
-                    icons += `<img
-                      alt="${item.name}"
-                      title="${item.name}"
-                      src="assets/img/items/${item.name.replaceAll(":", "")}.png"
-                    />`
-                }
-            });
-            icons += `</span>`;
-
-            const zoneTotal = Object.keys(itemsData[region][zone]).length;
-            // Zone insertion
-            regionCounter += counter;
-            regionTotal += zoneTotal;
-
-            if (zoneTotal != 0) {
-                zonePctg = Math.floor((counter / zoneTotal) * 100);
-            } else {
-                zonePctg = 100;
-            }
-
-            zonesToInsert += `<dt class="zoneTitle closed">
-              ${zone}${icons}<span class="counter">
-                (${counter} / ${
-                    Object.keys(itemsData[region][zone]).length
-                }) ${zonePctg}%
-              </span>
-            </dt>
-            <dd class="closed">
-              <div class="itemList">${itemsToInsert}</div>
-            </dd>`;
-        });
-
-        // Region insertion
-        globalCounter += regionCounter;
-        globalTotal += regionTotal;
-
-        if (regionTotal != 0) {
-            regionPctg = Math.floor((regionCounter / regionTotal) * 100);
-        } else {
-            regionPctg = 100;
-        }
-
-        regionsToInsert += `<dt class="regionTitle closed">
-          ${region}<span class="counter">
-            (${regionCounter} / ${regionTotal}) ${regionPctg}%
-          </span>
-        </dt>
-        <dd class="closed">
-          <dl>${zonesToInsert}</dl>
-        </dd>`;
-    });
-    regionsToInsert += `</dl>`;
-
-    // Global completion
-    const completion = `<h2>Completion: ${
-        Math.floor(globalCounter / globalTotal * 100)}%
-    </h2>`;
-
-    // Assemble final HTML page
-    document.getElementById("resultSection").innerHTML = (
-        completion
-        + notFoundCheckbox
-        + regionsToInsert
-    );
-
-    // Add collapsible feature
-    const elts = document.getElementsByTagName("dt");
-    for (let elt of elts) {
-        elt.onclick = toggleDisplay;
-    }
-}
-
-function fetchInventory() {
-    const saves_array = new Uint8Array(file_read);
+function fetchInventory(character) {
+    console.info("fetching inventory for save slot:", character);
+    const saves_array = new Uint8Array(SAVEFILE_CONTENT);
     slots = get_slot_ls(saves_array);
-    const inventory = Array.from(getInventory(slots[selectedSlot]));
+    const inventory = Array.from(getInventory(slots[character]));
     idList = split(inventory, dlcFile ? 8 : 16);
     idList.forEach((raw_id, index) => (
         idList[index] = getIdReversed(raw_id).toUpperCase())
     );
-    lastList = idList;
-}
-
-function toggleDisplay() {
-    const elt = this.nextElementSibling;
-    this.classList.toggle("closed");
-    this.classList.toggle("opened");
-    elt.classList.toggle("closed");
-    elt.classList.toggle("opened");
-}
-
-async function readJsonFiles() {
-    try {
-        let res = await fetch("assets/json/data.json");
-        const itemsData1 = await res.json();
-        let res2 = await fetch("assets/json/dlcData.json");
-        const itemsData2 = await res2.json();
-        itemsData = { ...itemsData1, ...itemsData2 };
-        res = await fetch("assets/json/collectibles.json");
-        quantifiableItems = await res.json();
-    }
-    catch (e) {
-        console.error(e);
-    }
 }
 
 function get_slot_ls(dat) {
@@ -373,13 +394,13 @@ function get_slot_ls(dat) {
 }
 
 function getInventory(slot) {
-    index = subfinder(slot, pattern) + pattern.byteLength + 8;
+    index = subfinder(slot, PATTERN) + PATTERN.byteLength + 8;
     if (!index) {
         index = 0;
         do {
             index += subfinder(
-                slot.subarray(index), pattern2
-            ) + pattern2.byteLength + 3;
+                slot.subarray(index), PATTERN_FALLBACK
+            ) + PATTERN_FALLBACK.byteLength + 3;
         } while (slot[index - 3] != 0 && index);
         dlcFile = true;
     }
@@ -387,7 +408,6 @@ function getInventory(slot) {
         slot.subarray(index, slot.byteLength),
         new Uint8Array(50).fill(0)
     ) + index + 6;
-    console.log(slot.subarray(index, index1));
     return slot.subarray(index, index1);
 }
 
@@ -436,10 +456,10 @@ function decimalToHex(d, padding) {
 }
 
 function findItemQuantities(slot) {
-    const result = new Array(quantifiableItems.length).fill(0);
+    const result = new Array(COLLECTIBLES_DATA.length).fill(0);
     for (let i = 0; i < slot.byteLength - 4; i++) {
-        for (let j = 0; j < quantifiableItems.length; j++) {
-            const item = quantifiableItems[j];
+        for (let j = 0; j < COLLECTIBLES_DATA.length; j++) {
+            const item = COLLECTIBLES_DATA[j];
             if (
                 slot[i] === item.id[0]
                 && slot[i + 1] === item.id[1]
@@ -451,33 +471,170 @@ function findItemQuantities(slot) {
     return result;
 }
 
+/*---
+    Helpers for updating element visibilities based on user interaction
+---*/
+
+/**
+ * Toggle display of details for items that were not found in the players inventory.
+ * 
+ * @param {Boolean} value Show details if `true`, otherwise hide them.
+ * 
+ * When details are shown the regular item name and image are displayed and the link to
+ * the Elden Ring wiki  wrapping the card is restored. The tooltip gets an additional
+ * hint that clicking the card will open the wiki.
+ */
 function toggleNotFoundItems(value) {
-    const elts = document.getElementsByClassName("disabledCard");
-    for (let card of elts) {
+    const disabledCardList = document.getElementsByClassName("disabledCard");
+    Array.from(disabledCardList).forEach((card) => {
+        let itemName = card.dataset.itemName;
+        const clickHint = "Click to open the wiki page.";
+        const tooltip = () => card.getElementsByTagName("div")[0];
         if (value) {
-            const name = card.getElementsByTagName("input")[0].value;
-            card.getElementsByTagName("img")[0].src = `assets/img/items/${
-                sanitizeImgName(name)
-            }.webp`;
-            card.getElementsByTagName("p")[0].innerText = name;
+            card.innerHTML = `
+                <a target="_blank" href="${card.dataset.itemWikiLink}">
+                    ${card.innerHTML}
+                </a>
+            `;
+            tooltip().innerHTML = `${clickHint}${tooltip().innerHTML}`;
+        } else {
+            tooltip().innerHTML = tooltip().innerHTML.replace(clickHint, "");
+            card.innerHTML = card.getElementsByTagName("a")[0].innerHTML;
+            itemName = Item.NOT_FOUND_NAME;
         }
-        else {
-            const type = card.getElementsByTagName("input")[1].value;
-            card.getElementsByTagName("img")[0].src = `assets/img/hints/${type}.png`;
-            card.getElementsByTagName("p")[0].innerText = "??????????";
-        }
-    }
+        const image = Item.getImageAsset(itemName, card.dataset.itemType, value);
+        card.getElementsByTagName("img")[0].src = image;
+        card.getElementsByTagName("h5")[0].innerText = itemName;
+    });
 }
 
-function sanitizeURL(name) {
-    if (name === "Gauntlets")
-        return "Chain+Gauntlets";
-    return name
-        .replaceAll(" +1", "")
-        .replaceAll(" +2", "")
-        .replaceAll(" (1)", "")
-        .replaceAll(" (2)", "")
-        .replaceAll("[", "(")
-        .replaceAll("]", ")")
-        .replaceAll(" ", "+");
+/**
+ * Toggle visibility of all elements that only relate to found items.
+ * - itemCards that represent items found in the players inventory
+ * - itemCards for collectibles that are at the total available amount
+ * - Zone sections that are marked as completed
+ * - Region sections are marked as completed
+ * 
+ * @param {Boolean} value hide elements if `true`, otherwise unhide them
+ * 
+ * Relevant cards are identified by their class names, relevant sections are
+ * identified by the class of the details section.
+*/
+function toggleShowOnlyNotFoundItems(value) {
+    const foundItemCards = document.querySelectorAll(
+        ".itemCard:not(.disabledCard):not(.collectible)"
+    );
+    Array.from(foundItemCards).forEach((card) => {
+        card.style.display = value ? "none" : ""
+    });
+    const foundCompletedCards = document.querySelectorAll("details.completed");
+    Array.from(foundCompletedCards).forEach(card => 
+        card.style.display = value ? "none" : ""
+    )
+}
+
+function toggleDetailsOpen(value) {
+    document.querySelectorAll("details").forEach(section => section.open = value);
+}
+
+/*---
+    Main Methods for setting up the webpage and updating the view
+    based on the stage of progression evaluation.
+---*/
+
+/** Create the character selection options from savefile contents.
+ * 
+ *  Is executed in the savefile change handler after the uploaded file was read.
+ * 
+ * @param {URLSearchParams} params look for the "character" parameter, if present set
+ *                                 its value as the selected option and trigger a change
+*/
+function makeSlotSelectForm(params) {
+    // Setup select form
+    const selectInput = (suffix = "") => (
+        document.getElementById(`characterSelectInput`)
+    );
+    const characterHeading = document.getElementById("characterName");
+    selectInput().onchange = e => {
+        document.getElementById("formSection").style.display = "none";
+        const selectedCharacter = selectInput().value;
+        const characterName = selectInput().options[selectedCharacter].innerText;
+        console.info("Selected Character:", characterName);
+        characterHeading.dataset.character = characterName;
+        characterHeading.innerText = characterName;
+        fetchInventory(selectedCharacter);
+        calculate(selectedCharacter);
+        
+    };
+    // Populate options with character names
+    getNames(SAVEFILE_CONTENT).forEach((slot, idx) => (
+        selectInput().innerHTML += CharacterSelectionOption(slot, idx)
+    ));
+    // pre-select a save slot from query parameter if available
+    const character = params.get("character");
+    if (character) {
+        const match = Array.from(selectInput().options).find(
+            opt => opt.text.trim() === character
+        );
+        if (match) {
+            selectInput().value = match.value;
+            selectInput().dispatchEvent(new Event("change"));
+        } else {
+            console.warn(`No slot '${character}' in savefile;`);
+        }
+    }
+    // Show the select form
+    document.getElementById("characterSelectForm").style.display = "block";
+}
+
+/** Evaluate character inventory and populate the `completionProgress` HTML section
+ * 
+ * It is filled with collapsible sections representing regions in the
+ * game. Each region is divided further into zones that are filled with
+ * a grid of cards for all items available in a region. By default, the
+ * names and icons for missing items are obscured and a hint how to find
+ * them is displayed on hover.
+*/
+async function calculate(character) {
+    let globalCounter = 0;
+    let globalTotal = 0;
+    // Start with Collectible Progression
+    let collectibleProgress = getCollectibles(character);
+    globalCounter += collectibleProgress[0];
+    globalTotal += collectibleProgress[1];
+    let completionProgressHTML = collectibleProgress[2];
+    // Add Region Progression
+    Object.keys(ITEM_DATA).forEach(regionTitle => {
+        const region = new Region(regionTitle, ITEM_DATA[regionTitle]);
+        globalCounter += region.counter;
+        globalTotal += region.total;
+        completionProgressHTML += region.getHTML();
+    });
+    // Add global completion summary
+    document.getElementById("globalCompletion").innerText = `
+        Completion: ${Math.floor(globalCounter / globalTotal * 100)}%
+    `;
+    // Set content of progress section and show completion results
+    document.getElementById("completionProgress").innerHTML = completionProgressHTML;
+    document.getElementById("resultSection").style.display = "";
+    document.getElementById("viewModifiers").style.display = "flex";
+}
+
+window.onload = async () => {
+    console.info(`Running Elden Ring Progression Tracker v${
+        Object.values(_VERSION).join(".")}`
+    );
+    readJsonFiles();
+    const params = new URLSearchParams(window.location.search);
+    const fileSelector = () => document.getElementById("savefile");
+    fileSelector().addEventListener("change", async (event) => {
+        let selector = fileSelector();
+        if (selector.value === null) {
+            alert("No file selected");
+            return;
+        }
+        document.getElementById("hint-for-savefile").style.display = "none";
+        await readFile(selector.files[0]);
+        makeSlotSelectForm(params);
+    });
 }
