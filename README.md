@@ -60,7 +60,7 @@ There are two checkboxes available that determine which items are shown and how 
 
 - [Zidodelakarai] Author of the original tool from whom I forked this repository
 - [Uinelj] Contributor to the original tool at the time of forking
-- [BenoutAnastay] Contributor to the original tool at the time of forking
+- [BenoitAnastay] Contributor to the original tool at the time of forking
 - [CyberGiant7] Author of [Elden Ring Automatic Checklist] who built the savefile reading functions
 - Contributors of the [Master Spreadsheet] for figuring out the item IDs
 - Reddit User [Erigondo] for providing all the [items pictures]
@@ -70,7 +70,7 @@ There are two checkboxes available that determine which items are shown and how 
 
 [Zidodelakarai]: https://github.com/Zidodelakarai
 [Uinelj]: https://github.com/Uinelj
-[BenoutAnastay]: https://github.com/BenoitAnastay
+[BenoitAnastay]: https://github.com/BenoitAnastay
 [CyberGiant7]: https://github.com/CyberGiant7
 [Elden Ring Automatic Checklist]: https://github.com/CyberGiant7/Elden-Ring-Automatic-Checklist
 [Master Spreadsheet]: https://docs.google.com/spreadsheets/d/1c7rIV3bBKDxP9ngixgigd7ZmczH3DYhDmMt8HY4ijV0/edit#gid=242218508
