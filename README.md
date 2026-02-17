@@ -26,7 +26,7 @@ The tool also counts all non-respawning collectibles in a special summary sectio
 
 A completion percentage is calculated for each zone, region and the entirety of the game.
 
-> !WARNING
+> [!WARNING]
 >
 > I know the following items cannot be identified even if they are present in the inventory.
 >
