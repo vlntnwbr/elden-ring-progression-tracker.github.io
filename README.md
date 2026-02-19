@@ -12,8 +12,8 @@ zones (e.g. Church of Elleh, Stormhill, etc.). The tool takes into account the f
 - Sorceries
 - Incantations
 - Spirit Ashes
-- Ashes of War (except those which are given through a weapon)
-- Unique Tools
+- Ashes of War
+- Unique Tools (e.g. Prattling Prate, Cookbooks, etc.)
 
 Quest and Boss Remembrance rewards are listed in separate categories.
 
@@ -28,14 +28,16 @@ A completion percentage is calculated for each zone, region and the entirety of 
 
 > [!WARNING]
 >
-> I know the following items cannot be identified even if they are present in the inventory.
+>  The tool has trouble with the following items:
 >
 > - Beast Champion Armor
 > - Errant Sorcerer Robe
 > - War Surgeon Gown
 >
-> The tool also does not differentiate between unaltered and altered pieces of Armor, even if they
-> have to be obtained individually and cannot be altered using tailoring.
+> These armor pieces are looted / dropped in an altered state and cannot be correctly identified as
+> their unaltered piece even if it is in the players inventory.
+> 
+> Otherwise the tool doesn't differentiate between altered and unaltered armor.
 
 ## Missing Items
 By default, items that are missing from the character's inventory have their name and image hidden.

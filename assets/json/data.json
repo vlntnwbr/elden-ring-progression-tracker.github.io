@@ -1,6 +1,18 @@
 {
   "Limgrave": {
     "Limgrave": {
+      "100C5FF8": {
+        "name": "Commoner's Headband (Altered)",
+        "type": "foe",
+        "hint": "<ul><li>This item must be farmed and cannot be created by altering Commoner's Headband. It is dropped by Commoner enemies found in Stormveil Castle, Leyndell, Royal Capital and other areas of the map. The non-altered Commoner's Headband is looted from a specific corpse and neither piece can be altered by the player.",
+        "multiple": false
+      },
+      "1005A99C": {
+        "name": "Aristocrat Garb (Altered)",
+        "type": "foe",
+        "hint": "This item must be farmed and cannot be created by altering the Aristocrat Garb. Dropped by the Commoner Nobles found wandering the roads in most areas.<li>An early spot to farm is the Troll-pulled Carriage's caravan on the road west of Waypoint Ruins.</li>",
+        "multiple": false
+      },
       "40000082": {
         "name": "Spectral Steed Whistle",
         "type": "chest",
@@ -1217,6 +1229,18 @@
       }
     },
     "Stormveil Castle": {
+      "10031128": {
+        "name": "Banished Knight Helm (Altered)",
+        "type": "foe",
+        "hint": "<ul><li>This item must be farmed and cannot be created by altering Banished Knight Helm.</li><li>Dropped by the Banished Knights in Stormveil Castle.</li><li>A good one to far is located next to the Chapel in the northwest section, where Sorcerer Rogier is located. Reachable from the Rampart Tower Site of Grace. Go through the door to the southeast, turn southwest and run down the circular stairs to the Banished Knight.</li><ul>",
+        "multiple": false
+      },
+      "1003118C": {
+        "name": "Banished Knight Armor (Altered)",
+        "type": "foe",
+        "hint": "<ul><li>This item must be farmed and cannot be created by altering the Banished Knight Armor.</li><li>Stormveil Castle. Dropped by the Banished Knight in the room with the human limbs hanging from the roof.</li><li>Cathedral of Dragon Communion. Dropped by the Banished Knight patrolling the perimeter of the Cathedral.</li><ul>",
+        "multiple": true
+      },
       "20000884": {
         "name": "Claw Talisman",
         "type": "chest",
@@ -4974,6 +4998,12 @@
       }
     },
     "Cathedral of Dragon Communion": {
+      "1003118C": {
+        "name": "Banished Knight Armor (Altered)",
+        "type": "foe",
+        "hint": "<ul><li>This item must be farmed and cannot be created by altering the Banished Knight Armor.</li><li>Stormveil Castle. Dropped by the Banished Knight in the room with the human limbs hanging from the roof.</li><li>Cathedral of Dragon Communion. Dropped by the Banished Knight patrolling the perimeter of the Cathedral.</li><ul>",
+        "multiple": true
+      },
       "10030E6C": {
         "name": "Banished Knight Greaves",
         "type": "foe",
@@ -6223,6 +6253,12 @@
     },
     "Divine Tower of West Altus": {},
     "Windmill Village": {
+      "100C394C": {
+        "type": "foe",
+        "name": "Festive Garb (Altered)",
+        "hint": "<ul><li>This item must be farmed and cannot be created by altering the Festive Garb.<li></li>It is dropped by the dancing women in Windmill Village, Altus Plateau.</li></ul>",
+        "multiple": false
+      },
       "40001856": {
         "name": "Scouring Black Flame",
         "type": "boss",
@@ -7639,10 +7675,10 @@
         "hint": "<ul><li>Prattling Pate \"You're Beautiful\" can be found at Hermit Village in Mt. Gelmir, on a corpse on the side of a house in the south side of the village.</li><li> Prattling Pate \"Hello\" Prattling Pate \"Thank you\" Prattling Pate \"Apologies\" Prattling Pate \"Wonderful\" Prattling Pate \"Please help\" Prattling Pate \"Let's get to it\" Prattling Pate \"My Beloved\".</li></ul>",
         "multiple": false
       },
-      "100F1B94": {
-        "name": "Errant Sorcerer Robe",
+      "100F1F7C": {
+        "name": "Errant Sorcerer Robe (Altered)",
         "type": "chest",
-        "hint": "<ul><li>After completing Boc's Questline, you (or Boc) can alter Errant Sorcerer Robe (Altered) into the non-altered Errant Sorcerer Robe.</li></ul>",
+        "hint": "<ul><li>Looted off a corpse in Hermit Village, Mt. Gelmir. The corpse is found in a house in the northeast corner of the village.</li></ul>",
         "multiple": false
       },
       "100F1B30": {
@@ -9827,10 +9863,10 @@
         "hint": "<ul><li>The Malformed Dragon Armor Chest Armor can be obtained from killing the Tree Sentinel up the stairs from the Beside the Great Bridge site of grace.</li></ul>",
         "multiple": false
       },
-      "100AFCE4": {
-        "name": "Beast Champion Armor",
+      "100B00CC": {
+        "name": "Beast Champion Armor (Altered)",
         "type": "invader",
-        "hint": "<ul><li>Drops from Knight Bernahl upon death. If not killed before, he will eventually invade you at Crumbling Farum Azula, dropping the entire set with an altered version of the chest piece. You can get this armor piece early by killing Knight Bernahl when you first encounter him at Warmaster's Shack.</li></ul>",
+        "hint": "<ul><li>Drops from Knight Bernahl upon death. If not killed before, he will eventually invade you at Crumbling Farum Azula, dropping the entire set.</li><li>You can get this armor piece early by killing Knight Bernahl when you first encounter him at Warmaster's Shack.</li></ul>",
         "multiple": false
       },
       "400022FF": {
@@ -11109,8 +11145,8 @@
         "hint": "<ul><li>Dropped by killing one of three Nameless White Mask NPC invaders in the Mohgwyn Dynasty Mausoleum area of Siofra River, northwest of the Palace Approach Ledge-Road site of grace, in the blood filled lake. This one can be found adjacent to the Giant Crow enemy near the blood filled lake drop off.</li></ul>",
         "multiple": false
       },
-      "100A60A4": {
-        "name": "War Surgeon Gown",
+      "100A648C": {
+        "name": "War Surgeon Gown (Altered)",
         "type": "invader",
         "hint": "<ul><li>Dropped by killing one of three Nameless White Mask NPC invaders in the Mohgwyn Dynasty Mausoleum area of Siofra River, northwest of the Palace Approach Ledge-Road site of grace, in the blood filled lake. This one can be found adjacent to the Giant Crow enemy near the blood filled lake drop off. After completing Boc's Questline, you (or Boc) can alter War Surgeon Gown (Altered) into non-altered War Surgeon Gown.</li></ul>",
         "multiple": false
@@ -11824,6 +11860,12 @@
         "type": "quest",
         "hint": "<ul><li>Dropped by Bloody Finger Hunter Yura to the north of Murkwater Cave or in his camp near Seaside Ruins Site of Grace. Can also be obtained by completing Bloody Finger Hunter Yura's questline at the Second Church of Marika allowing you to also obtain Eleonora's Poleblade and Purifying Crystal Tear.  If his questline is progressed too far without killing Eleonora (to the point where his body is taken by Shabriri), the Nagakiba can be found in one of the prior locations the player saw Yura: 1. at Yura's camp north-east of the Seaside Ruins Site of Grace, 2. at the underpass below the Murkwater Coast Site of Grace, or 3. on the edge of the bridge a little way away from the Main Academy Gate Site of Grace.  If killed by the Zamor Ruins site of grace, you can loot the Ronin Armor set from him and the weapon will be found in his usual spot just north of Murkwater Cave or it can be found south of the Dragon Burnt Ruins under the broken structure.</li></ul>",
         "multiple": false
+      },
+      "800027D8": {
+        "name": "Ash of War: Piercing Fang",
+        "type": "quest",
+        "hint": "Can be acquired from Nagakiba as part of Bloody Finger Hunter Yura Questline",
+        "multiple": false
       }
     },
     "D, Hunter of the Dead": {
@@ -12010,6 +12052,12 @@
         "type": "quest",
         "hint": "<ul><li>Given at +8 by Sorcerer Rogier at the balcony in Roundtable Hold after defeating Godrick the Grafted.</li></ul>",
         "multiple": false
+      },
+      "80004E20": {
+        "name": "Ash of War: Glintblade Phalanx",
+        "type": "quest",
+        "hint": "Acquired from Rogier's Rapier. After defeating Godrick the Grafted in Stormveil Castle, Rogier can be found in Roundtable Hold, by the balcony. After speaking to him, and receiving his rapier, the skill may be removed from the rapier in order to be applied to other armaments.",
+        "multiple": false
       }
     },
     "Sorceress Sellen": {
@@ -12175,6 +12223,12 @@
         "name": "Iron Ball",
         "type": "quest",
         "hint": "<ul><li>Dropped by Blackguard Big Boggart.</li></ul>",
+        "multiple": false
+      },
+      "8000FF78": {
+        "name": "Ash of War: Braggart's Roar",
+        "type": "quest",
+        "hint": "Found on Blackguard Big Boggart's Iron Ball weapon after killing him or continuing Dung Eater'S questline and looting the body.",
         "multiple": false
       }
     },

@@ -377,6 +377,18 @@ function fetchInventory(character) {
     idList.forEach((raw_id, index) => (
         idList[index] = getIdReversed(raw_id).toUpperCase())
     );
+    /*  Compare IDs found in inventory with database and log the ones not considered
+        by this tool. This is useful for debugging incorrectly identified items.     */
+    const allItems = [];
+    Object.keys(ITEM_DATA).forEach(regionTitle => (
+        Object.keys(ITEM_DATA[regionTitle]).forEach(zoneTitle =>
+            allItems.push(...Object.keys(ITEM_DATA[regionTitle][zoneTitle]))
+        )
+    ))
+    const uniqueItems = new Set(allItems);
+    const itemsInInventoryNotInItemsList = idList.filter(item => !uniqueItems.has(item))
+    console.log(itemsInInventoryNotInItemsList);
+
 }
 
 function get_slot_ls(dat) {
