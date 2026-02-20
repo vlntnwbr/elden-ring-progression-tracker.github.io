@@ -379,15 +379,15 @@ function fetchInventory(character) {
     );
     /*  Compare IDs found in inventory with database and log the ones not considered
         by this tool. This is useful for debugging incorrectly identified items.     */
-    const allItems = [];
-    Object.keys(ITEM_DATA).forEach(regionTitle => (
-        Object.keys(ITEM_DATA[regionTitle]).forEach(zoneTitle =>
-            allItems.push(...Object.keys(ITEM_DATA[regionTitle][zoneTitle]))
-        )
-    ))
-    const uniqueItems = new Set(allItems);
-    const itemsInInventoryNotInItemsList = idList.filter(item => !uniqueItems.has(item))
-    console.log(itemsInInventoryNotInItemsList);
+    // const allItems = [];
+    // Object.keys(ITEM_DATA).forEach(regionTitle => (
+    //     Object.keys(ITEM_DATA[regionTitle]).forEach(zoneTitle =>
+    //         allItems.push(...Object.keys(ITEM_DATA[regionTitle][zoneTitle]))
+    //     )
+    // ))
+    // const uniqueItems = new Set(allItems);
+    // const itemsInInventoryNotInItemsList = idList.filter(item => !uniqueItems.has(item))
+    // console.debug(itemsInInventoryNotInItemsList);
 
 }
 
@@ -570,8 +570,10 @@ function makeSlotSelectForm(params) {
     selectInput().onchange = e => {
         document.getElementById("formSection").style.display = "none";
         const selectedCharacter = selectInput().value;
-        const characterName = selectInput().options[selectedCharacter].innerText;
-        console.info("Selected Character:", characterName);
+        const characterName = selectInput().options[
+            Number(selectedCharacter) + 1
+        ].innerText;
+        console.info("SlotSelectForm: selected character:", characterName);
         characterHeading.dataset.character = characterName;
         characterHeading.innerText = characterName;
         fetchInventory(selectedCharacter);
