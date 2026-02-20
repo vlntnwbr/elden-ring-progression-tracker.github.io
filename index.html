@@ -2,14 +2,13 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Elden Ring Progression</title>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta charset="utf-8" />
   <meta name="application-name" content="Elden Ring Progression Tracker" />
   <meta name="description" content="Check your Elden Ring progression and hunt down missing items on your way to lordship!" />
-  <meta name="author" content="Valentin Weber" />
   <meta name="keywords" content="Gaming, Elden Ring, FromSoft, Soulslike, Dark Souls, Progression Tracking," />
+  <meta name="author" content="Valentin Weber" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="license" href="https://www.gnu.org/licenses/gpl-3.0-standalone.html">
   <link rel="icon" href="assets/img/favicon.ico" />
   <link href="assets/css/styles.css" type="text/css" rel="stylesheet" />
@@ -23,31 +22,35 @@
   </header>
   
   <main>
-    <div id="formSection">
+    <section id="formSection">
+      
       <form id="saveFileUploadForm">
-        <label for="saveFileInput">
-          <p><strong>Upload Elden Ring save file</strong></p>
-        </label>
-        <input type="file" id="savefile" accept=".sl2, .co2" />
-        <p id="hint-for-savefile">
+        <h2 id="uploadLabel">Upload Elden Ring save file</h2>
+        <input id="saveFileInput" 
+          type="file"
+          accept=".sl2, .co2"
+          aria-labelledby="uploadLabel"
+          aria-describedby="uploadHint"
+        />
+        <p id="uploadHint">
           Usually located in<br />
-          C:/Users/<i>yourName</i>/<wbr>AppData/Roaming/EldenRing<wbr>/<i>aNumber</i>/ER0000.sl2
+          <i>%APPDATA%</i>/EldenRing<wbr>/76561198036462776/ER0000.sl2
         </p>
       </form>
+      
       <form style="display: none" id="characterSelectForm">
-        <label for="characterSelectInput">
-          <p><strong>Select Character</strong></p>
-        </label>
-        <select aria-label="slot-select" id="characterSelectInput">
+        <h2 id="selectLabel">Select Character</h2>
+        <select aria-labelledby="selectLabel" id="characterSelectInput">
           <option selected>Select Character</option>
           <!--
             Populated by list of characters read from the savefile
-           -->
+            -->
         </select>
       </form>
-    </div>
+    </section>
 
-    <div id="resultSection" style="display: none">
+    <section id="resultSection" style="display: none">
+      
       <h2>
         <span id="characterName" data-character="null">
           Character Name
@@ -56,12 +59,47 @@
           <!-- Populated with the percentage of overall completion progress -->
         </span>
       </h2>
-      <div id="completionProgress">  
+
+      <form
+        id="viewModifiers"
+        role="toolbar"
+        aria-label="view-modifiers"
+        style="display: none;"
+      >
+        <label for="showMissingItemDetails">
+          Missing Item Details
+          <input
+            id="showMissingItemDetails"
+            type="checkbox"
+            onclick="toggleNotFoundItems(this.checked)"
+          />
+        </label>
+
+        <label for="showOnlyNotFound">
+          Missing Items Only
+          <input
+            id="showOnlyNotFound"
+            type="checkbox"
+            onclick="toggleShowOnlyNotFoundItems(this.checked)"
+          />
+        </label>
+        
+        <label for="expandSections">
+          Expand All
+          <input
+            id="expandSections"
+            type="checkbox"
+            onclick="toggleDetailsOpen(this.checked)"
+          />
+        </label>
+      </form>
+
+      <section id="completionProgress">  
         <!-- Populated with the savefile analysis results
          TODO: make this the <dl> wrapper
         -->
-      </div>
-    </div>
+      </section>
+    </section>
 
   </main>
   
@@ -72,25 +110,6 @@
       See project on GitHub
     </a>
   </footer>
-  
-  <aside
-    id="viewModifiers"
-    role="toolbar"
-    aria-label="view-modifiers"
-    style="display: none;"
-  >
-    <form>
-      <input type="checkbox" id="notFound" onclick="toggleNotFoundItems(this.checked)" />
-      <label for="notFound">Show Missing Item Details</label>
-      <input type="checkbox" id="showOnlynotFound" onclick="toggleShowOnlyNotFoundItems(this.checked)" />
-      <label for="showOnlynotFound">Show only Missing Items</label>
-      <input type="checkbox" id="expandSections" onclick="toggleDetailsOpen(this.checked)" />
-      <label for="expandSections">Expand All</label>
-    </form>
-  </aside>
-
-
-
 </body>
 
 </html>

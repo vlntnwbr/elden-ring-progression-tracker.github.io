@@ -604,7 +604,7 @@ async function calculate(character, savefile) {
     // Set content of progress section and show completion results
     document.getElementById("completionProgress").innerHTML = completionProgressHTML;
     document.getElementById("formSection").style.display = "none";
-    document.getElementById("resultSection").style.display = "block";
+    document.getElementById("resultSection").style.display = "flex";
     document.getElementById("viewModifiers").style.display = "flex";
 }
 
