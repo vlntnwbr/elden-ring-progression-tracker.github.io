@@ -1,35 +1,16 @@
-const _VERSION = {
-    major: 2,
-    patch: 0,
-    minor: 0
-}
-
-const PATTERN = new Uint8Array([176, 173, 1, 0, 1, 255, 255, 255]);
-const PATTERN_FALLBACK = new Uint8Array([176, 173, 1, 0, 1]);
+const VERSION = { major: 2, minor: 0, patch: 0 };
 
 let COLLECTIBLES_DATA;          // Global Store for assets/data/collectibles.json
 let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
-let SAVEFILE_CONTENT = null;    // Global Store for the binary contents of the savefile
-
-// TODO evaluate the need for these
-let slots = [];
-let idList = [];
-let dlcFile = false;
 
 /*
 TODO: if only one save slot is read from the file, automatically calculate progression
 TODO: Add the quantities of found items to the itemCard
-TODO: Fix the icon-lists for Collectibles other than Cracked Pot
 */
 
 /*---
     HTML Templates filled by the result of savefile analysis
 ---*/
-
-/** Get select option for a character slot from a savefile. */
-const CharacterSelectionOption = (value, idx) => (
-    value ? `<option value=${idx}>${value}</option>` : null
-);
 
 /**
  * Creates a details element with progress tracking.
@@ -159,13 +140,13 @@ class Item {
     // TODO add quantities
     static NOT_FOUND_NAME = "??????????";
     
-    constructor(key, item) {
-        this.key = key                   // value from json/data.json
+    constructor(key, item, inventory) {
+        this.key = key                   // key from json/data.json
         this.name = item.name;           // value from json/data.json
         this.type = item.type;           // value from json/data.json
         this.hint = item.hint;           // value from json/data.json
         this.multiple = item.multiple;   // value from json/data.json
-        this.found = idList.includes(key);
+        this.found = inventory.includes(key);
         this.url = `https://eldenring.wiki.fextralife.com/${
             sanitizeURL(this.name)
         }`;
@@ -184,14 +165,14 @@ class Item {
 
 class Zone {
 
-    constructor(zoneTitle, zoneData) {
+    constructor(zoneTitle, zoneData, inventory) {
         this.counter = 0;
         this.total = 0;
         this.title = zoneTitle;
         this.itemsHTML = "";
         this.iconList = this.getIconList();
         Object.keys(zoneData).forEach(itemKey => {
-            const item = new Item(itemKey, zoneData[itemKey]);
+            const item = new Item(itemKey, zoneData[itemKey], inventory);
             this.total++;
             if (item.found) this.counter++;
             this.itemsHTML += item.getHTML();
@@ -230,14 +211,14 @@ class Zone {
 
 class Region {
 
-    constructor (regionTitle, regionData) {
+    constructor (regionTitle, regionData, inventory) {
         this.counter = 0;
         this.total = 0;
         this.title = regionTitle;
         this.regionsHTML = [];
         // this.iconList = ""
         Object.keys(regionData).forEach(zoneTitle => {
-            const zone = new Zone(zoneTitle, regionData[zoneTitle]);
+            const zone = new Zone(zoneTitle, regionData[zoneTitle], inventory);
             this.counter += zone.counter;
             this.total += zone.total
             this.regionsHTML.push(zone.getHTML())
@@ -253,8 +234,8 @@ class Region {
     )}
 }
 
-function getCollectibles(character) {
-    const itemsQuantities = findItemQuantities(slots[character]);
+function getCollectibles(slot) {
+    const itemsQuantities = findItemQuantities(slot);
     const itemsFound = itemsQuantities.reduce((prev, cur) => prev + cur, 0);
     const totalItems = COLLECTIBLES_DATA.reduce(
         (prev, cur) => prev + cur.places.length, 0
@@ -295,178 +276,6 @@ async function readJsonFiles() {
     }
 }
 
-function bufferEqual(buf1, buf2) {
-    if (buf1.byteLength !== buf2.byteLength) return false;
-    const dv1 = new Int8Array(buf1);
-    const dv2 = new Int8Array(buf2);
-    for (let i = 0; i !== buf1.byteLength; i++) {
-        if (dv1[i] !== dv2[i]) return false;
-    }
-    return true;
-}
-
-/** Read the Elden Ring Save file uploaded by the user
- * 
- * This populates the <file_read> global variable
- * 
- * After populating the global variable it checks that value against an array
- * to validate if the savefile is valid. It resets the global variable.
- * It is awaited in the onChange handler of the file selector
-*/
-function readFile(savefile) {
-    return new Promise((resolve, reject) => {
-        const file = savefile;
-        const reader = new FileReader();
-        reader.onload = e => {  // executed when reader has read the file
-            SAVEFILE_CONTENT = e.target.result;
-            if (
-                !bufferEqual(
-                    SAVEFILE_CONTENT["slice"](0, 4),
-                    new Int8Array([66, 78, 68, 52]))
-            ) {
-                e.target.result = null;
-                document.getElementById("characterSelectForm").style.display = "none";
-                alert("Insert a valid file");
-                reject();
-                return;
-            }
-            resolve();
-        };
-        reader.onerror = e => {
-            console.error("Error : " + e.type);
-            reject();
-        };
-        reader.readAsArrayBuffer(file);  // read the uploaded file.
-    });
-}
-
-/** Read the character names from the slots in the savefile */
-function getNames(fromSavefile) {
-    const decoder = new TextDecoder("utf-8");
-    const _decode = (sliceStart, sliceStop, stopOffset = 32) => decoder.decode(
-        new Int8Array(Array.from(new Uint16Array(fromSavefile.slice(
-            sliceStart,
-            sliceStop + stopOffset
-    )))));
-
-    const slotBytes = [
-        [0x1901d0e, 0x1901d0e],
-        [0x1901f5a, 0x1901f5a],
-        [0x19021a6, 0x19021a6],
-        [0x19023f2, 0x19023f2],
-        [0x190263e, 0x190263e],
-        [0x190288a, 0x190288a],
-        [0x1902ad6, 0x1902ad6],
-        [0x1902d22, 0x1902d22],
-        [0x1902f6e, 0x1902f6e],
-        [0x19031ba, 0x19031ba]
-    ];
-    const names = [];
-    slotBytes.forEach( ( slot ) => names.push(
-        _decode(slot[0], slot[1]).replaceAll("\x00", "")
-    ));
-    return names;
-}
-
-function fetchInventory(character) {
-    console.info("fetching inventory for save slot:", character);
-    const saves_array = new Uint8Array(SAVEFILE_CONTENT);
-    slots = get_slot_ls(saves_array);
-    const inventory = Array.from(getInventory(slots[character]));
-    idList = split(inventory, dlcFile ? 8 : 16);
-    idList.forEach((raw_id, index) => (
-        idList[index] = getIdReversed(raw_id).toUpperCase())
-    );
-    /*  Compare IDs found in inventory with database and log the ones not considered
-        by this tool. This is useful for debugging incorrectly identified items.     */
-    // const allItems = [];
-    // Object.keys(ITEM_DATA).forEach(regionTitle => (
-    //     Object.keys(ITEM_DATA[regionTitle]).forEach(zoneTitle =>
-    //         allItems.push(...Object.keys(ITEM_DATA[regionTitle][zoneTitle]))
-    //     )
-    // ))
-    // const uniqueItems = new Set(allItems);
-    // const itemsInInventoryNotInItemsList = idList.filter(item => !uniqueItems.has(item))
-    // console.debug(itemsInInventoryNotInItemsList);
-
-}
-
-function get_slot_ls(dat) {
-    const slot1 = dat.subarray(0x00000310, 0x0028030f + 1);
-    const slot2 = dat.subarray(0x00280320, 0x050031f + 1);
-    const slot3 = dat.subarray(0x500330, 0x78032f + 1);
-    const slot4 = dat.subarray(0x780340, 0xa0033f + 1);
-    const slot5 = dat.subarray(0xa00350, 0xc8034f + 1);
-    const slot6 = dat.subarray(0xc80360, 0xf0035f + 1);
-    const slot7 = dat.subarray(0xf00370, 0x118036f + 1);
-    const slot8 = dat.subarray(0x1180380, 0x140037f + 1);
-    const slot9 = dat.subarray(0x1400390, 0x168038f + 1);
-    const slot10 = dat.subarray(0x16803a0, 0x190039f + 1);
-    return [slot1, slot2, slot3, slot4, slot5, slot6, slot7, slot8, slot9, slot10];
-}
-
-function getInventory(slot) {
-    index = subfinder(slot, PATTERN) + PATTERN.byteLength + 8;
-    if (!index) {
-        index = 0;
-        do {
-            index += subfinder(
-                slot.subarray(index), PATTERN_FALLBACK
-            ) + PATTERN_FALLBACK.byteLength + 3;
-        } while (slot[index - 3] != 0 && index);
-        dlcFile = true;
-    }
-    index1 = subfinder(
-        slot.subarray(index, slot.byteLength),
-        new Uint8Array(50).fill(0)
-    ) + index + 6;
-    return slot.subarray(index, index1);
-}
-
-function subfinder(mylist, pattern) {
-    for (let i = 0; i < mylist.byteLength; i++) {
-        if (
-            mylist[i] === pattern[0]
-            && bufferEqual(
-                mylist.subarray(i, i + pattern.byteLength),
-                pattern
-            )
-        ) return i;
-    }
-}
-
-function split(list_a, chunk_size) {
-    const splitted = [];
-    for (let i = 0; i < list_a.length; i += chunk_size) {
-        let chunk = list_a.slice(i, i + chunk_size);
-        splitted.push(chunk);
-    }
-    return splitted;
-}
-
-function getIdReversed(id) {
-    let final_id = "";
-    tmp = id.slice(0, 4).reverse();
-    for (let i = 0; i < 4; i++) {
-        final_id += decimalToHex(tmp[i], 2);
-    }
-    return final_id;
-}
-
-function decimalToHex(d, padding) {
-    let hex = Number(d).toString(16);
-    padding = (
-        typeof padding === "undefined" || padding === null
-        ? (padding = 2)
-        : padding
-    );
-
-    while (hex.length < padding) {
-        hex = "0" + hex;
-    }
-    return hex;
-}
-
 function findItemQuantities(slot) {
     const result = new Array(COLLECTIBLES_DATA.length).fill(0);
     for (let i = 0; i < slot.byteLength - 4; i++) {
@@ -483,9 +292,323 @@ function findItemQuantities(slot) {
     return result;
 }
 
-/*---
-    Helpers for updating element visibilities based on user interaction
----*/
+class SaveFileReader {
+
+    #PATTERN_BASE = new Uint8Array([176, 173, 1, 0, 1, 255, 255, 255]);
+    #PATTERN_SOTE = new Uint8Array([176, 173, 1, 0, 1]);
+
+    constructor() {
+        this.rawContent = null;
+        this.slots = {};
+        this.dlcFile = false;
+    }
+
+    async setContent(file) { return new Promise((resolve, reject) => {
+        
+        console.debug("SaveFileReader: reading file contents")
+        const reject_promise = (message, error="") => {
+            console.error(
+                `Error: SaveFileReader: ${message.lower()}${error ? `: ${e.type}` : ""}`
+            );
+            alert(message);
+            reject();
+        }
+        const reader = new FileReader();
+        // Set the handler for successfully reading file contents
+        reader.onload = e => {
+            if (this.#validateSavefile(e.target.result)) {
+                this.rawContent = e.target.result;
+                resolve();
+            } else {
+                e.target.result = null;
+                // let's see if we need this, we should probably do a try catch
+                document.getElementById("characterSelectForm").style.display = "none";
+                reject_promise("Uploaded file is invalid.");
+            }
+        };
+        // Set the error handler to execute when file cannot be read.
+        reader.onerror = error => reject_promise("Cannot read file contents", error);
+        // Read the uploaded file contents and trigger handlers
+        reader.readAsArrayBuffer(file);
+    });
+        
+    }
+
+    /**
+     * Validate if the content is an Elden Ring savefile by checking its magic number.
+     * @private
+     * @param {Buffer|Uint8Array|Int8Array} content - The file content to validate
+     * @returns {boolean} True if content starts with magic number `BND4`.
+     */
+    #validateSavefile(content) { return this.#bufferEqual(
+        content["slice"](0, 4),
+        new Int8Array([66, 78, 68, 52])
+    );}
+
+    /**
+     * Compares two ArrayBuffer objects for equality.
+     * @private
+     * @param {ArrayBuffer} buffer - The first buffer to compare.
+     * @param {ArrayBuffer} expectedBuffer - The second buffer to compare.
+     * @returns {boolean} True if both buffers have identical byte length and values.
+     */
+    #bufferEqual(buffer, expectedBuffer) {
+        if (buffer.byteLength !== expectedBuffer.byteLength) return false;
+        const dv1 = new Int8Array(buffer);
+        const dv2 = new Int8Array(expectedBuffer);
+        for (let i = 0; i !== buffer.byteLength; i++) {
+            if (dv1[i] !== dv2[i]) return false;
+        }
+        return true;
+    }
+
+    setSaveSlots() {
+        if (!this.rawContent) throw new Error(
+            "SaveFileReader: Error: cannot read save slots without savefile content"
+        );
+        console.debug("SaveFileReader: extracting character slots from savefile");
+        // Boundaries of where the encoded character name of all 10 save slots and
+        // their respective inventories are located in the savefile contents.
+        let saveSlotLocations = [
+            {
+                "name": [0x1901d0e, 0x1901d0e],
+                "inventory": [0x00000310, 0x0028030f]
+            },
+            {
+                "name": [0x1901f5a, 0x1901f5a],
+                "inventory": [0x00280320, 0x050031f]
+            },
+            {
+                "name": [0x19021a6, 0x19021a6],
+                "inventory": [0x500330, 0x78032f]
+            },
+            {
+                "name": [0x19023f2, 0x19023f2],
+                "inventory": [0x780340, 0xa0033f]
+            },
+            {
+                "name": [0x190263e, 0x190263e],
+                "inventory": [0xa00350, 0xc8034f]
+            },
+            {
+                "name": [0x190288a, 0x190288a],
+                "inventory": [0xc80360, 0xf0035f]
+            },
+            {
+                "name": [0x1902ad6, 0x1902ad6],
+                "inventory": [0xf00370, 0x118036f]
+            },
+            {
+                "name": [0x1902d22, 0x1902d22],
+                "inventory": [0x1180380, 0x140037f]
+            },
+            {
+                "name": [0x1902f6e, 0x1902f6e],
+                "inventory": [0x1400390, 0x168038f]
+            },
+            {
+                "name": [0x19031ba, 0x19031ba],
+                "inventory": [0x16803a0, 0x190039f]
+            }
+        ];
+        // Helpers for decoding the slot name
+        const _nameDecoder = new TextDecoder("utf-8");
+        const getName = (slot) => _nameDecoder.decode(
+            new Int8Array(Array.from(new Uint16Array(this.rawContent.slice(
+                slot.name[0], slot.name[1] + 32
+            ))))
+        ).replace(/\u0000+$/, "").trim();
+        // Helpers for slicing the savefile into inventory arrays
+        const slotsArray = new Uint8Array(this.rawContent);
+        const getInventory = (slot) => slotsArray.subarray(
+            slot.inventory[0], slot.inventory[1] + 1
+        )
+        // Populate save slots array
+        saveSlotLocations.forEach(slot =>
+            this.slots[getName(slot)] = getInventory(slot)
+        );
+    }
+
+    fetchInventory(character) {
+        const error = (message) => new Error(
+            `SaveFileReader: Error: cannot fetch inventory for ${character}: ${message}`
+        )
+        if (Object.keys(this.slots).length === 0) throw error(
+            "save slots not available"
+        );
+        console.debug(`SaveFileReader: fetching inventory for '${character}'`);
+        const inventorySlot = this.slots[character];
+        if (!inventorySlot) throw error("slot was not found in savefile content");
+        const inventoryArray = this.#getInventoryArray(inventorySlot);
+        return this.#getItemsFromInventory(inventoryArray);
+    }
+
+    #getInventoryArray(slot) {
+        // Determine the start boundary of the inventory subarray
+        console.debug("SaveFileReader: processing inventory slot");
+        let startIndex = this.#getBoundary(
+            slot, this.#PATTERN_BASE
+        ) + this.#PATTERN_BASE.byteLength + 8 || 0;
+        // No index found, this means the uploaded savefile includes the DLC contents
+        if (!startIndex) {
+            this.dlcFile = true;
+            do { startIndex += this.#getBoundary(
+                slot.subarray(startIndex),
+                this.#PATTERN_SOTE,
+            ) + this.#PATTERN_SOTE.byteLength + 3;
+        } while (startIndex && slot[startIndex -3] != 0);}
+        // Determine the stop boundary of the inventory subarray
+        let stopIndex = this.#getBoundary(
+            slot.subarray(startIndex, slot.byteLength),
+            new Uint8Array(50).fill(0)
+        ) + startIndex + 6
+        console.debug(
+            `SaveFileReader: determined boundaries of ${
+                this.dlcFile ? "'SOTE'" : "'BASE'"
+            } savefile: start@${startIndex}; stop@${stopIndex}`
+        )
+        return slot.subarray(startIndex, stopIndex);
+    }
+
+    #getBoundary (slot, pattern) {
+        for (let i = 0; i < slot.length; i++) if (
+            slot[i] === pattern[0] &&
+            this.#bufferEqual(slot.subarray(i, i + pattern.byteLength), pattern)
+        ) return i;
+    }
+
+    #getItemsFromInventory(inventoryArray) {
+        console.debug("SaveFileReader: decoding item IDs in inventory")
+        const itemList = [];
+        const chunkSize = this.dlcFile ? 8 : 16;  // space taken up by a single item id
+        for (let i = 0; i < inventoryArray.length; i += chunkSize) {
+            let rawId = inventoryArray.slice(i, i + chunkSize);
+            itemList.push(this.#getHexID(rawId));
+        }
+        return itemList;
+    }
+
+    #getHexID(id) {
+        let decodedId = "";
+        id.slice(0, 4).reverse().forEach( idPart => {
+            let decodedChar = Number(idPart).toString(16);
+            while (decodedChar.length < 2) decodedChar = "0" + decodedChar;
+            decodedId += decodedChar;
+        })
+        return decodedId.toUpperCase();
+    }
+}
+
+class FileUploadForm {
+    constructor(queryParameters) {
+        this.params = queryParameters;
+        this.#getInputElement().addEventListener("change", e => this.#onChange())
+    }
+
+    show() { this.#setVisibility(""); }
+
+    hide() { this.#setVisibility("none"); }
+    
+    #setVisibility(display) {
+        document.getElementById("saveFileUploadForm").style.display = display;
+    }
+    
+    #getInputElement() { return document.getElementById("saveFileInput"); }
+
+    async #onChange() {
+        if (this.#getInputElement.value === null) {
+            alert("No file selected");
+            return;
+        }
+        const saveFile = new SaveFileReader();
+        await saveFile.setContent(this.#getInputElement().files[0]);
+        const select = new CharacterSelectForm(saveFile, this.params.get("character"));
+        select.show();  // see CharacterSelectForm.#onChange
+    }
+}
+
+class CharacterSelectForm {
+
+    constructor(savefile, queryInput) {
+        savefile.setSaveSlots();
+        this.savefile = savefile;
+        this.queryInput = queryInput;
+        console.debug("CharacterSelectForm: populating character options");
+        Object.keys(this.savefile.slots).forEach( name => this.#addOption(name) );
+        this.#getInputElement().addEventListener("change", e => this.#onChange());
+        this.#selectFromQuery();
+    }
+
+    show() { this.#setVisibility("block"); }
+
+    hide() { this.#setVisibility("none"); }
+
+    #setVisibility(display) {
+        document.getElementById("characterSelectForm").style.display = display;
+    }
+    
+    #getInputElement() { return document.getElementById("characterSelectInput"); }
+    
+    #addOption(character) {
+        if (!character) return;
+        const option = document.createElement("option");
+        option.text = character;
+        this.#getInputElement().appendChild(option);
+    }
+
+    #getOptions() { return Array.from(this.#getInputElement().options); }
+
+    #selectFromQuery() {
+        if (!this.queryInput) return;
+        const characterOption = this.#getOptions().find( option =>
+            option.text.trim() === this.queryInput.trim()
+        );
+        if (!characterOption) {
+            console.warn("CharacterSelectForm: cannot find slot for", this.queryInput);
+            return;
+        };
+        this.#getInputElement().value = characterOption.value;
+        this.#getInputElement().dispatchEvent(new Event("change"));
+    }
+
+    #onChange() {
+        const selectedCharacter = this.#getInputElement().value;
+        console.debug(`CharacterSelectForm: selected '${selectedCharacter}'`);
+        document.getElementById("characterName").innerText = selectedCharacter;
+        this.hide();
+        calculate(selectedCharacter, this.savefile);
+    }
+}
+
+async function calculate(character, savefile) {
+    
+    const inventory = savefile.fetchInventory(character);
+    let globalCounter = 0;
+    let globalTotal = 0;
+    // Start with Collectible Progression
+    let collectibleProgress = getCollectibles(savefile.slots[character]);
+    globalCounter += collectibleProgress[0];
+    globalTotal += collectibleProgress[1];
+    let completionProgressHTML = collectibleProgress[2];
+    // Add Region Progression
+    Object.keys(ITEM_DATA).forEach(regionTitle => {
+        const region = new Region(regionTitle, ITEM_DATA[regionTitle], inventory);
+        globalCounter += region.counter;
+        globalTotal += region.total;
+        completionProgressHTML += region.getHTML();
+    });
+    // Add global completion summary
+    document.getElementById("globalCompletion").innerText = `
+        Completion: ${Math.floor(globalCounter / globalTotal * 100)}%
+    `;
+    // Set content of progress section and show completion results
+    document.getElementById("completionProgress").innerHTML = completionProgressHTML;
+    document.getElementById("formSection").style.display = "none";
+    document.getElementById("resultSection").style.display = "block";
+    document.getElementById("viewModifiers").style.display = "flex";
+}
+
+/*--- Helpers for updating element visibility based on user interaction ---*/
 
 /**
  * Toggle display of details for items that were not found in the players inventory.
@@ -549,106 +672,12 @@ function toggleDetailsOpen(value) {
     document.querySelectorAll("details").forEach(section => section.open = value);
 }
 
-/*---
-    Main Methods for setting up the webpage and updating the view
-    based on the stage of progression evaluation.
----*/
-
-/** Create the character selection options from savefile contents.
- * 
- *  Is executed in the savefile change handler after the uploaded file was read.
- * 
- * @param {URLSearchParams} params look for the "character" parameter, if present set
- *                                 its value as the selected option and trigger a change
-*/
-function makeSlotSelectForm(params) {
-    // Setup select form
-    const selectInput = (suffix = "") => (
-        document.getElementById(`characterSelectInput`)
-    );
-    const characterHeading = document.getElementById("characterName");
-    selectInput().onchange = e => {
-        document.getElementById("formSection").style.display = "none";
-        const selectedCharacter = selectInput().value;
-        const characterName = selectInput().options[
-            Number(selectedCharacter) + 1
-        ].innerText;
-        console.info("SlotSelectForm: selected character:", characterName);
-        characterHeading.dataset.character = characterName;
-        characterHeading.innerText = characterName;
-        fetchInventory(selectedCharacter);
-        calculate(selectedCharacter);
-        
-    };
-    // Populate options with character names
-    getNames(SAVEFILE_CONTENT).forEach((slot, idx) => (
-        selectInput().innerHTML += CharacterSelectionOption(slot, idx)
-    ));
-    // pre-select a save slot from query parameter if available
-    const character = params.get("character");
-    if (character) {
-        const match = Array.from(selectInput().options).find(
-            opt => opt.text.trim() === character
-        );
-        if (match) {
-            selectInput().value = match.value;
-            selectInput().dispatchEvent(new Event("change"));
-        } else {
-            console.warn(`No slot '${character}' in savefile;`);
-        }
-    }
-    // Show the select form
-    document.getElementById("characterSelectForm").style.display = "block";
-}
-
-/** Evaluate character inventory and populate the `completionProgress` HTML section
- * 
- * It is filled with collapsible sections representing regions in the
- * game. Each region is divided further into zones that are filled with
- * a grid of cards for all items available in a region. By default, the
- * names and icons for missing items are obscured and a hint how to find
- * them is displayed on hover.
-*/
-async function calculate(character) {
-    let globalCounter = 0;
-    let globalTotal = 0;
-    // Start with Collectible Progression
-    let collectibleProgress = getCollectibles(character);
-    globalCounter += collectibleProgress[0];
-    globalTotal += collectibleProgress[1];
-    let completionProgressHTML = collectibleProgress[2];
-    // Add Region Progression
-    Object.keys(ITEM_DATA).forEach(regionTitle => {
-        const region = new Region(regionTitle, ITEM_DATA[regionTitle]);
-        globalCounter += region.counter;
-        globalTotal += region.total;
-        completionProgressHTML += region.getHTML();
-    });
-    // Add global completion summary
-    document.getElementById("globalCompletion").innerText = `
-        Completion: ${Math.floor(globalCounter / globalTotal * 100)}%
-    `;
-    // Set content of progress section and show completion results
-    document.getElementById("completionProgress").innerHTML = completionProgressHTML;
-    document.getElementById("resultSection").style.display = "";
-    document.getElementById("viewModifiers").style.display = "flex";
-}
-
+/* --- Main Entry Point ---*/
 window.onload = async () => {
     console.info(`Running Elden Ring Progression Tracker v${
-        Object.values(_VERSION).join(".")}`
+        Object.values(VERSION).join(".")}`
     );
     readJsonFiles();
     const params = new URLSearchParams(window.location.search);
-    const fileSelector = () => document.getElementById("savefile");
-    fileSelector().addEventListener("change", async (event) => {
-        let selector = fileSelector();
-        if (selector.value === null) {
-            alert("No file selected");
-            return;
-        }
-        document.getElementById("hint-for-savefile").style.display = "none";
-        await readFile(selector.files[0]);
-        makeSlotSelectForm(params);
-    });
+    new FileUploadForm(params);  // see FileUploadForm.#onChange
 }
