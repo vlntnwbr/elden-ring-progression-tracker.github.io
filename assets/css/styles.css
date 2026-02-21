@@ -28,8 +28,8 @@ header {
 }
 
 .title {
-    font-size: 50px;
-    margin-top: -50px;
+    font-size: xxx-large;
+    margin-top: -1em;
 }
 
 main {
@@ -43,14 +43,20 @@ main {
     overflow-y: auto;
 }
 
+h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: xx-large;
+    text-align: center;
+}
+
 #formSection {
     text-align: center;
 }
 
-#formSection h2 {
-    margin-bottom: 1rem;
-    font-size: large;
-}
+/* #formSection h3 {
+    font-size: x-large;
+} */
 
 #saveFileLabel {
     display: inline-block;
@@ -65,6 +71,7 @@ main {
     font-size: small;
 }
 
+#formSection h3,
 #saveFileLabelText strong {
     font-size: medium;
 }
@@ -76,11 +83,18 @@ main {
     overflow-x: hidden;
 }
 
-#resultSection h2 {
-    margin: 1rem;
-    margin-top: 0;
-    font-size: 48px;
-    text-align: center;
+#characterSelectInput {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0.5em;
+    border-radius: var(--default-radius);
+    border: 1pt solid var(--primary-background-color);
+    background-color: var(--disabled-background-color);
+    color: var(--primary-text-color);
+}
+
+#characterSelectInput option {
+    background-color: #1c1c1c;
 }
 
 form#viewModifiers {

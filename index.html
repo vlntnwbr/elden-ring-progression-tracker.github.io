@@ -27,7 +27,7 @@
       <form id="saveFileUploadForm">
         <label id="saveFileLabel">
           <span id="saveFileLabelText">
-            <strong>Upload File</strong><br />
+            <strong role="heading" aria-level="3">Upload File</strong><br />
             It is usually located in<br />
             <i>%APPDATA%</i>/EldenRing/76561198036462776/ER0000.sl2
           </span>
@@ -40,12 +40,10 @@
       </form>
       
       <form style="display: none" id="characterSelectForm">
-        <h2 id="selectLabel">Select Character</h2>
+        <h3 id="selectLabel">Select Character</h3>
         <select aria-labelledby="selectLabel" id="characterSelectInput">
-          <option selected>-</option>
-          <!--
-            Populated by list of characters read from the savefile
-            -->
+          <option selected><!-- Empty Display-Only Option --></option>
+          <!-- Populated by character options read from the savefile -->
         </select>
       </form>
     </section>
@@ -80,8 +78,10 @@
           />
         </label>
         
-        <label for="expandSections">
-          Expand All
+        <label id="detailsToggle" for="expandSections">
+          <span id="detailsToggleAction">
+            Expand
+          </span>
           <input
             id="expandSections"
             type="checkbox"

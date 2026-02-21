@@ -585,7 +585,7 @@ class CharacterSelectForm {
 
     #onChange() {
         const selectedCharacter = this.#getInputElement().value;
-        if (selectedCharacter === "-") return;
+        if (!selectedCharacter) return;
         console.debug(`CharacterSelectForm: selected '${selectedCharacter}'`);
         this.hide();
         calculate(selectedCharacter, this.savefile);
@@ -682,6 +682,7 @@ function toggleShowOnlyNotFoundItems(value) {
 
 function toggleDetailsOpen(value) {
     document.querySelectorAll("details").forEach(section => section.open = value);
+    document.getElementById("detailsToggleAction").innerText = value ? "Collapse" : "Expand";
 }
 
 /* --- Main Entry Point ---*/
