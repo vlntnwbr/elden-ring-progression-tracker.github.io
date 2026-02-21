@@ -23,25 +23,26 @@
   
   <main>
     <section id="formSection">
-      
+      <h2>Elden Ring Savefile</h2>
       <form id="saveFileUploadForm">
-        <h2 id="uploadLabel">Upload Elden Ring save file</h2>
-        <input id="saveFileInput" 
-          type="file"
-          accept=".sl2, .co2"
-          aria-labelledby="uploadLabel"
-          aria-describedby="uploadHint"
-        />
-        <p id="uploadHint">
-          Usually located in<br />
-          <i>%APPDATA%</i>/EldenRing<wbr>/76561198036462776/ER0000.sl2
-        </p>
+        <label id="saveFileLabel">
+          <span id="saveFileLabelText">
+            <strong>Upload File</strong><br />
+            It is usually located in<br />
+            <i>%APPDATA%</i>/EldenRing/76561198036462776/ER0000.sl2
+          </span>
+          <input id="saveFileInput" 
+            type="file"
+            accept=".sl2, .co2"
+            style="display: none;"
+          />
+        </label>
       </form>
       
       <form style="display: none" id="characterSelectForm">
         <h2 id="selectLabel">Select Character</h2>
         <select aria-labelledby="selectLabel" id="characterSelectInput">
-          <option selected>Select Character</option>
+          <option selected>-</option>
           <!--
             Populated by list of characters read from the savefile
             -->
@@ -51,13 +52,8 @@
 
     <section id="resultSection" style="display: none">
       
-      <h2>
-        <span id="characterName" data-character="null">
-          Character Name
-        </span>
-        <span class="subheading" id="globalCompletion">
-          <!-- Populated with the percentage of overall completion progress -->
-        </span>
+      <h2 id="globalCompletion">      
+        <!-- Character Name • Completion % -->
       </h2>
 
       <form

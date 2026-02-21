@@ -1,4 +1,4 @@
-const VERSION = { major: 2, minor: 0, patch: 0 };
+const VERSION = { major: 2, minor: 1, patch: 0 };
 
 let COLLECTIBLES_DATA;          // Global Store for assets/data/collectibles.json
 let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
@@ -304,35 +304,24 @@ class SaveFileReader {
     }
 
     async setContent(file) { return new Promise((resolve, reject) => {
-        
         console.debug("SaveFileReader: reading file contents")
-        const reject_promise = (message, error="") => {
-            console.error(
-                `Error: SaveFileReader: ${message.lower()}${error ? `: ${e.type}` : ""}`
-            );
-            alert(message);
-            reject();
-        }
         const reader = new FileReader();
         // Set the handler for successfully reading file contents
         reader.onload = e => {
             if (this.#validateSavefile(e.target.result)) {
                 this.rawContent = e.target.result;
                 resolve();
-            } else {
-                e.target.result = null;
-                // let's see if we need this, we should probably do a try catch
-                document.getElementById("characterSelectForm").style.display = "none";
-                reject_promise("Uploaded file is invalid.");
-            }
+            } else { reject( `${file.name} is not an Elden Ring Savefile`); }
         };
         // Set the error handler to execute when file cannot be read.
-        reader.onerror = error => reject_promise("Cannot read file contents", error);
+        reader.onerror = e => reject(`Cannot process file: ${file.name}`);
         // Read the uploaded file contents and trigger handlers
         reader.readAsArrayBuffer(file);
     });
         
     }
+
+    #error(handler, message) { return handler(`SaveFileReader: Error: ${message}`) };
 
     /**
      * Validate if the content is an Elden Ring savefile by checking its magic number.
@@ -502,29 +491,52 @@ class SaveFileReader {
 class FileUploadForm {
     constructor(queryParameters) {
         this.params = queryParameters;
-        this.#getInputElement().addEventListener("change", e => this.#onChange())
+        this.defaultLabelText = document.getElementById("saveFileLabelText").innerHTML;
+        this.#getInputElement().addEventListener("change", e => this.#onChange());
+        if (this.#getFile()) {
+            this.#setLabel();
+            this.#getInputElement().dispatchEvent(new Event("change"));
+        }
     }
 
     show() { this.#setVisibility(""); }
 
     hide() { this.#setVisibility("none"); }
-    
+
     #setVisibility(display) {
         document.getElementById("saveFileUploadForm").style.display = display;
+    }
+
+    #setLabel(action) {
+        const innerHTML = action === "default" ? this.defaultLabelText : `
+            <strong>${this.#getFile().name}</strong><br />
+            Click to upload a different Savefile
+        `
+        document.getElementById("saveFileLabelText").innerHTML = innerHTML;
     }
     
     #getInputElement() { return document.getElementById("saveFileInput"); }
 
     async #onChange() {
-        if (this.#getInputElement.value === null) {
-            alert("No file selected");
+        if ( this.#hasNoValue() ) { alert("No file selected"); return; }
+        const uploadFile = this.#getFile();
+        this.#setLabel()
+        const saveFile = new SaveFileReader();
+        try {
+            await saveFile.setContent(uploadFile);
+        } catch (error) {
+            console.error(error);
+            alert(error)
+            this.#setLabel("default");
             return;
         }
-        const saveFile = new SaveFileReader();
-        await saveFile.setContent(this.#getInputElement().files[0]);
         const select = new CharacterSelectForm(saveFile, this.params.get("character"));
         select.show();  // see CharacterSelectForm.#onChange
     }
+
+    #getFile() { return this.#getInputElement().files[0] }
+
+    #hasNoValue() { return this.#getInputElement().value === null; }
 }
 
 class CharacterSelectForm {
@@ -573,8 +585,8 @@ class CharacterSelectForm {
 
     #onChange() {
         const selectedCharacter = this.#getInputElement().value;
+        if (selectedCharacter === "-") return;
         console.debug(`CharacterSelectForm: selected '${selectedCharacter}'`);
-        document.getElementById("characterName").innerText = selectedCharacter;
         this.hide();
         calculate(selectedCharacter, this.savefile);
     }
@@ -598,8 +610,8 @@ async function calculate(character, savefile) {
         completionProgressHTML += region.getHTML();
     });
     // Add global completion summary
-    document.getElementById("globalCompletion").innerText = `
-        Completion: ${Math.floor(globalCounter / globalTotal * 100)}%
+    document.getElementById("globalCompletion").innerHTML = `
+        ${character} • ${Math.floor(globalCounter / globalTotal * 100)}%
     `;
     // Set content of progress section and show completion results
     document.getElementById("completionProgress").innerHTML = completionProgressHTML;
