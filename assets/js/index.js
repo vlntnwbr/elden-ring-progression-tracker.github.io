@@ -261,21 +261,6 @@ function getCollectibles(slot) {
     File Reading functions
 --*/
 
-async function readJsonFiles() {
-    try {
-        let res = await fetch("assets/json/data.json");
-        const itemsData1 = await res.json();
-        let res2 = await fetch("assets/json/dlcData.json");
-        const itemsData2 = await res2.json();
-        ITEM_DATA = { ...itemsData1, ...itemsData2 };
-        res = await fetch("assets/json/collectibles.json");
-        COLLECTIBLES_DATA = await res.json();
-    }
-    catch (e) {
-        console.error(e);
-    }
-}
-
 function findItemQuantities(slot) {
     const result = new Array(COLLECTIBLES_DATA.length).fill(0);
     for (let i = 0; i < slot.byteLength - 4; i++) {
@@ -320,8 +305,6 @@ class SaveFileReader {
     });
         
     }
-
-    #error(handler, message) { return handler(`SaveFileReader: Error: ${message}`) };
 
     /**
      * Validate if the content is an Elden Ring savefile by checking its magic number.
@@ -489,25 +472,41 @@ class SaveFileReader {
 }
 
 class FileUploadForm {
-    constructor(queryParameters) {
-        this.params = queryParameters;
+    
+    constructor(onChange) {
         this.defaultLabelText = document.getElementById("saveFileLabelText").innerHTML;
-        this.#getInputElement().addEventListener("change", e => this.#onChange());
-        if (this.#getFile()) {
-            this.#setLabel();
-            this.#getInputElement().dispatchEvent(new Event("change"));
-        }
+        this.#getInputElement().addEventListener("change", onChange);
     }
 
+    /** Create the final form with runtime data */
+    init() {
+        if (!this.#getFile()) return;
+        this.setLabel();
+        this.#getInputElement().dispatchEvent(new Event("change"));
+        this.show();
+    }
+
+    /** Remove the inline style attribute of the HTML form */
     show() { this.#setVisibility(""); }
 
+    /** Set inline style attribute of HTML form to `none` */
     hide() { this.#setVisibility("none"); }
 
+    /** Set inline style attribute of HTML form
+     * @param {string} display a valid value for the css display attribute
+    */
     #setVisibility(display) {
         document.getElementById("saveFileUploadForm").style.display = display;
     }
 
-    #setLabel(action) {
+    /**
+     * Sets the label text for the save file HTML input.
+     * @param {string} action - Use `"default"` to reset the label text, other values
+     *                          set the text to the name of the selected file with a
+     *                          hint that a different file can be uploaded by clicking.
+     * @returns {void}
+     */
+    setLabel(action) {
         const innerHTML = action === "default" ? this.defaultLabelText : `
             <strong>${this.#getFile().name}</strong><br />
             Click to upload a different Savefile
@@ -517,50 +516,44 @@ class FileUploadForm {
     
     #getInputElement() { return document.getElementById("saveFileInput"); }
 
-    async #onChange() {
-        if ( this.#hasNoValue() ) { alert("No file selected"); return; }
-        const uploadFile = this.#getFile();
-        this.#setLabel()
-        const saveFile = new SaveFileReader();
-        try {
-            await saveFile.setContent(uploadFile);
-        } catch (error) {
-            console.error(error);
-            alert(error)
-            this.#setLabel("default");
-            return;
-        }
-        const select = new CharacterSelectForm(saveFile, this.params.get("character"));
-        select.show();  // see CharacterSelectForm.#onChange
-    }
-
     #getFile() { return this.#getInputElement().files[0] }
-
-    #hasNoValue() { return this.#getInputElement().value === null; }
 }
 
 class CharacterSelectForm {
 
-    constructor(savefile, queryInput) {
-        savefile.setSaveSlots();
-        this.savefile = savefile;
-        this.queryInput = queryInput;
-        console.debug("CharacterSelectForm: populating character options");
-        Object.keys(this.savefile.slots).forEach( name => this.#addOption(name) );
-        this.#getInputElement().addEventListener("change", e => this.#onChange());
+    constructor(selectCharacter, onChange) {
+        this.queryInput = selectCharacter;
+        this.#getInputElement().addEventListener("change", onChange);
+    }
+    
+    /** Create the final form with runtime data.
+     *  - add a select option for each character slot
+     *  - pre-select a character slot under given conditions
+     *  - show the form element in the DOM
+     * @param {Object} characterNames Array of character names for creating options
+    */
+    init(characterNames) {
+        characterNames.forEach( name => this.#addOption(name) );
         this.#selectFromQuery();
+        this.show();
     }
 
+    /** Set inline style attribute of HTML form to `block` */
     show() { this.#setVisibility("block"); }
 
+    /** Set inline style attribute of HTML form to `none` */
     hide() { this.#setVisibility("none"); }
 
+    /** Set inline style attribute of HTML form
+     * @param {string} display a valid value for the css display attribute
+    */
     #setVisibility(display) {
         document.getElementById("characterSelectForm").style.display = display;
     }
     
     #getInputElement() { return document.getElementById("characterSelectInput"); }
     
+    /** Append an option for the given character name to the select form */
     #addOption(character) {
         if (!character) return;
         const option = document.createElement("option");
@@ -568,6 +561,7 @@ class CharacterSelectForm {
         this.#getInputElement().appendChild(option);
     }
 
+    /** Get array with all options of the select form */
     #getOptions() { return Array.from(this.#getInputElement().options); }
 
     #selectFromQuery() {
@@ -582,42 +576,107 @@ class CharacterSelectForm {
         this.#getInputElement().value = characterOption.value;
         this.#getInputElement().dispatchEvent(new Event("change"));
     }
-
-    #onChange() {
-        const selectedCharacter = this.#getInputElement().value;
-        if (!selectedCharacter) return;
-        console.debug(`CharacterSelectForm: selected '${selectedCharacter}'`);
-        this.hide();
-        calculate(selectedCharacter, this.savefile);
-    }
 }
 
-async function calculate(character, savefile) {
+class ProgressTracker {
+    constructor() {
+        this.params = new URLSearchParams(window.location.search);
+        this.fileUpload = new FileUploadForm(this.#onSaveFileUpload.bind(this));
+        this.saveFile = new SaveFileReader();
+        this.characterSelect = new CharacterSelectForm(
+            this.params.get("character"),
+            this.#onCharacterSelect.bind(this)
+        );
+        // attributes set at runtime
+        this.character = null;
+        this.itemData = null;
+    }
+
+    static async start() {
+        console.info(
+            `Elden Ring Progress Tracker v${Object.values(VERSION).join(".")}`
+        )
+        const tracker = new ProgressTracker();
+        await tracker.#readItemsJSON()
+        tracker.fileUpload.init();
+    }
+
+    calculate() {
+
+        if (!this.itemData) throw new Error("Cannot calculate progress: no item data");
+        if (!this.character) throw new Error("Cannot calculate progress: no character");
     
-    const inventory = savefile.fetchInventory(character);
-    let globalCounter = 0;
-    let globalTotal = 0;
-    // Start with Collectible Progression
-    let collectibleProgress = getCollectibles(savefile.slots[character]);
-    globalCounter += collectibleProgress[0];
-    globalTotal += collectibleProgress[1];
-    let completionProgressHTML = collectibleProgress[2];
-    // Add Region Progression
-    Object.keys(ITEM_DATA).forEach(regionTitle => {
-        const region = new Region(regionTitle, ITEM_DATA[regionTitle], inventory);
-        globalCounter += region.counter;
-        globalTotal += region.total;
-        completionProgressHTML += region.getHTML();
-    });
-    // Add global completion summary
-    document.getElementById("globalCompletion").innerHTML = `
-        ${character} • ${Math.floor(globalCounter / globalTotal * 100)}%
-    `;
-    // Set content of progress section and show completion results
-    document.getElementById("completionProgress").innerHTML = completionProgressHTML;
-    document.getElementById("formSection").style.display = "none";
-    document.getElementById("resultSection").style.display = "flex";
-    document.getElementById("viewModifiers").style.display = "flex";
+        const inventory = this.saveFile.fetchInventory(this.character);
+        let globalCounter = 0;
+        let globalTotal = 0;
+        // Start with Collectible Progression
+        let collectibleProgress = getCollectibles(this.saveFile.slots[this.character]);
+        
+        globalCounter += collectibleProgress[0];
+        globalTotal += collectibleProgress[1];
+        let completionProgressHTML = collectibleProgress[2];
+        // Add Region Progression
+        Object.keys(this.itemData).forEach(regionTitle => {
+            const region = new Region(
+                regionTitle,
+                this.itemData[regionTitle],
+                inventory
+            );
+            globalCounter += region.counter;
+            globalTotal += region.total;
+            completionProgressHTML += region.getHTML();
+        });
+        this.#setResultHeading(globalCounter, globalTotal);
+        // Set content of progress section and show completion results
+        document.getElementById("completionProgress").innerHTML = completionProgressHTML;
+        this.#setVisibility("formSection", "none");
+        this.#setVisibility("resultSection", "flex")
+    }
+
+    async #onSaveFileUpload(event) {
+        const upload = event.target.files[0];
+        if (!upload) { alert("No file selected"); return; }
+        try {
+            await this.saveFile.setContent(upload);
+            this.saveFile.setSaveSlots();
+            this.characterSelect.init(Object.keys(this.saveFile.slots));
+        } catch (error) {
+            console.error(error);
+            alert(error);
+            this.fileUpload.setLabel("default");
+        }
+        // this.characterSelect.show();
+    }
+
+    #onCharacterSelect(event) {
+        const selectedCharacter = event.target.value;
+        if (!selectedCharacter) return;
+        this.character = selectedCharacter;
+        this.calculate()
+    }
+
+    #setResultHeading(found, total) {
+        document.getElementById("globalCompletion").innerHTML = `
+            ${this.character} • ${Math.floor((found / total) * 100)}%
+        `
+    }
+
+    #setVisibility(elementId, display) {
+        document.getElementById(elementId).style.display = display;
+    }
+
+    async #readItemsJSON() {
+        try {
+            let res = await fetch("assets/json/data.json");
+            const itemsData1 = await res.json();
+            let res2 = await fetch("assets/json/dlcData.json");
+            const itemsData2 = await res2.json();
+            this.itemData = { ...itemsData1, ...itemsData2 };
+            res = await fetch("assets/json/collectibles.json");
+            COLLECTIBLES_DATA = await res.json();
+        }
+        catch (error) { alert(error); throw error }
+    }
 }
 
 /*--- Helpers for updating element visibility based on user interaction ---*/
@@ -631,7 +690,7 @@ async function calculate(character, savefile) {
  * the Elden Ring wiki  wrapping the card is restored. The tooltip gets an additional
  * hint that clicking the card will open the wiki.
  */
-function toggleNotFoundItems(value) {
+function toggleMissingItemsDetails(value) {
     const disabledCardList = document.getElementsByClassName("disabledCard");
     Array.from(disabledCardList).forEach((card) => {
         let itemName = card.dataset.itemName;
@@ -680,17 +739,13 @@ function toggleShowOnlyNotFoundItems(value) {
     )
 }
 
+/** Set the opened state of all details elements 
+ * @param {Boolean} value the value to set the opened state to
+*/
 function toggleDetailsOpen(value) {
     document.querySelectorAll("details").forEach(section => section.open = value);
     document.getElementById("detailsToggleAction").innerText = value ? "Collapse" : "Expand";
 }
 
 /* --- Main Entry Point ---*/
-window.onload = async () => {
-    console.info(`Running Elden Ring Progression Tracker v${
-        Object.values(VERSION).join(".")}`
-    );
-    readJsonFiles();
-    const params = new URLSearchParams(window.location.search);
-    new FileUploadForm(params);  // see FileUploadForm.#onChange
-}
+window.onload = async () => { await ProgressTracker.start(); }
