@@ -1,4 +1,14 @@
-const VERSION = { major: 2, minor: 1, patch: 0 };
+const VERSION = { major: 2, minor: 2, patch: 0 };
+
+const SHOW_ITEM_CATEGORIES = new Set([
+    "boss",
+    "chest",
+    "foe",
+    "invader",
+    "merchant",
+    "quest",
+    "scarab",
+])
 
 let COLLECTIBLES_DATA;          // Global Store for assets/data/collectibles.json
 let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
@@ -9,12 +19,8 @@ TODO: if only one save slot is read from the file, automatically calculate progr
 TODO: when a single section was expanded the view modifier needs to turn into "Collapse"
 
 
-TODO: add a filter to exclude entries for specific item "type" (from data)
-- boss
-- chest
-- foe
-- invader
-- merchant
+TODO: make the "missing items only" filter aware of the "type" filter
+TODO: make the "type" filter aware of the "missing items only" filter
 - quest
 - scarab
 */
@@ -281,7 +287,6 @@ function findItemQuantities(slot) {
                 && slot[i + 2] === item.id[2]
                 && slot[i + 3] === 176
             ) {
-                console.log("findItemQuantities:", item.name, slot.slice(i, i+5));
                 result[j] = slot[i + 4];
             }
         }
@@ -310,7 +315,7 @@ class SaveFileReader {
     }
 
     async setContent(file) { return new Promise((resolve, reject) => {
-        console.debug("SaveFileReader: reading file contents")
+        console.info("SaveFileReader: reading file contents")
         const reader = new FileReader();
         // Set the handler for successfully reading file contents
         reader.onload = e => {
@@ -433,7 +438,6 @@ class SaveFileReader {
         const inventorySlot = this.slots[character];
         if (!inventorySlot) throw error("slot was not found in savefile content");
         const inventoryArray = this.#getInventoryArray(inventorySlot);
-        console.log(inventoryArray, inventoryArray.constructor);
         return this.#getItemsFromInventory(inventoryArray);
     }
 
@@ -495,7 +499,6 @@ class SaveFileReader {
             while (part.lengthy < 2) part = "0" + part;
             quantity += part;
         })
-        console.log(`SaveFileReader.getHexID: ${decodedId.toUpperCase()}: ${parseInt(quantity)}`, id);
         return decodedId.toUpperCase();
     }
 }
@@ -759,13 +762,37 @@ function toggleShowOnlyNotFoundItems(value) {
     const foundItemCards = document.querySelectorAll(
         ".itemCard:not(.disabledCard):not(.collectible)"
     );
+    const itemTypeFilters = {}
     Array.from(foundItemCards).forEach((card) => {
-        card.style.display = value ? "none" : ""
+        const itemType = card.dataset.itemType;
+        itemTypeFilters[itemType] ??= (
+            document.getElementById(`showItems[${itemType}]`).checked
+        );
+        const showItemType = itemTypeFilters[itemType];
+        card.style.display = value || !showItemType ? "none" : "";
     });
     const foundCompletedCards = document.querySelectorAll("details.completed");
     Array.from(foundCompletedCards).forEach(card => 
         card.style.display = value ? "none" : ""
     )
+}
+
+function showItemFilters(checked) {
+    document.getElementById(
+        "filterSection"
+    ).style.display = checked ? "contents" : "none";
+}
+
+function updateItemFilters(category, checked) {
+    const missingItemsOnly = document.getElementById("showOnlyNotFound").checked;
+    const itemCards = document.querySelectorAll(`.itemCard[data-item-type="${category}"]`);
+    itemCards.forEach( card => {
+        if (!checked || (missingItemsOnly && !card.classList.contains("disabledCard"))) {
+            card.style.display = "none";
+        } else {
+            card.style.display = "";
+        }
+    });
 }
 
 /** Set the opened state of all details elements 

@@ -97,7 +97,7 @@ form#viewModifiers {
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-    padding: 0.5em 0;
+    padding: 0.5em;
     margin-bottom: 1rem;
     background-color: var(--primary-background-color);
     border-radius: var(--default-radius);
@@ -112,7 +112,7 @@ form#viewModifiers label {
 }
 
 form#viewModifiers label:has(input:checked) {
-    color: var(--secondary-text-color);
+    color: var(--primary-background-color);
     background-color: var(--primary-text-color);
 }
 
@@ -121,6 +121,21 @@ form#viewModifiers input {
   opacity: 0;
   height: 0;
   width: 0;
+}
+
+form#viewModifiers:has(#showItems\[foe\]:checked)
+label[for="showItems[foe]"] {
+    color: var(--primary-background-color);
+    background-color: var(--primary-text-color);
+}
+
+#filterSection::before {
+    content: "";
+    flex-basis: 100%;
+}
+
+#filterSection label {
+    font-size: small;
 }
 
 #completionProgress {

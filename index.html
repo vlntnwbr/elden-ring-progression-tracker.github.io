@@ -20,12 +20,12 @@
     <img src="assets/images/logo.png" alt="Elden Ring Logo" class="logo" />
     <h1 class="title">Completion Tracker</h1>
   </header>
-  
+
   <main>
     <section id="formSection">
-      
+
       <h2>Elden Ring Savefile</h2>
-      
+
       <form id="saveFileUploadForm">
         <label id="saveFileLabel">
           <span id="saveFileLabelText">
@@ -33,14 +33,14 @@
             It is usually located in<br />
             <i>%APPDATA%</i>/EldenRing/76561198036462776/ER0000.sl2
           </span>
-          <input id="saveFileInput" 
+          <input id="saveFileInput"
             type="file"
             accept=".sl2, .co2"
             style="display: none;"
           />
         </label>
       </form>
-      
+
       <form style="display: none" id="characterSelectForm">
         <h3 id="selectLabel">Select Character</h3>
         <select aria-labelledby="selectLabel" id="characterSelectInput">
@@ -48,12 +48,12 @@
           <!-- Populated by character options read from the savefile -->
         </select>
       </form>
-    
+
     </section>
 
     <section id="resultSection" style="display: none">
-      
-      <h2 id="globalCompletion">      
+
+      <h2 id="globalCompletion">
         <!-- Character Name • Completion % -->
       </h2>
 
@@ -63,7 +63,9 @@
         aria-label="view-modifiers"
       >
         <label for="showMissingItemDetails">
-          Missing Item Details
+          <span>
+            Item Details
+          </span>
           <input
             id="showMissingItemDetails"
             type="checkbox"
@@ -72,14 +74,31 @@
         </label>
 
         <label for="showOnlyNotFound">
-          Missing Items Only
+          <span>
+            Missing Items Only
+          </span>
           <input
             id="showOnlyNotFound"
             type="checkbox"
             onclick="toggleShowOnlyNotFoundItems(this.checked)"
           />
         </label>
-        
+
+        <label for="showFilters">
+          <span id="showFiltersText">
+            Filters
+          </span>
+          <input
+            id="showFilters"
+            type="checkbox"
+            onclick="showItemFilters(this.checked)"
+          />
+        </label>
+
+        <label for="showItems[foe]">
+          Farm-Only Items
+        </label>
+
         <label id="detailsToggle" for="expandSections">
           <span id="detailsToggleAction">
             Expand
@@ -91,20 +110,97 @@
           />
         </label>
 
-        <label for="showFilters">
-          <span id="showFiltersText">
-            Filters
-          </span>
-          <input
-            id="showFilters"
-            type="checkbox"
-            onclick=""
-          />
-        </label>
+        <div id="filterSection" style="display: none;">
+
+          <label for="showItems[boss]">
+            <span>
+              Boss
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[boss]"
+              onclick="updateItemFilters('boss', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[chest]">
+            <span>
+              Chest
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[chest]"
+              onclick="updateItemFilters('chest', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[foe]">
+            <span>
+              Foe
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[foe]"
+              onclick="updateItemFilters('foe', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[invader]">
+            <span>
+              Invader
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[invader]"
+              onclick="updateItemFilters('invader', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[merchant]">
+            <span>
+              Merchant
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[merchant]"
+              onclick="updateItemFilters('merchant', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[quest]">
+            <span>
+              Quest
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[quest]"
+              onclick="updateItemFilters('quest', this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[scarab]">
+            <span>
+              Scarab
+            </span>
+            <input
+              type="checkbox"
+              id="showItems[scarab]"
+              onclick="updateItemFilters('scarab', this.checked)"
+              checked
+            />
+          </label>
+
+        </div>
 
       </form>
 
-      <section id="completionProgress">  
+      <section id="completionProgress">
         <!-- Populated with the savefile analysis results
          TODO: make this the <dl> wrapper
         -->
@@ -112,7 +208,7 @@
     </section>
 
   </main>
-  
+
   <footer>
     <a target="_blank"
       href="https://github.com/vlntnwbr/elden-ring-progression-tracker.github.io"
