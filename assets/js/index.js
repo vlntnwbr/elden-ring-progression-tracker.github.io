@@ -6,6 +6,8 @@ let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
 /*
 TODO: if only one save slot is read from the file, automatically calculate progression
 
+TODO: when a single section was expanded the view modifier needs to turn into "Collapse"
+
 
 TODO: add a filter to exclude entries for specific item "type" (from data)
 - boss

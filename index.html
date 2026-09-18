@@ -23,7 +23,9 @@
   
   <main>
     <section id="formSection">
+      
       <h2>Elden Ring Savefile</h2>
+      
       <form id="saveFileUploadForm">
         <label id="saveFileLabel">
           <span id="saveFileLabelText">
@@ -46,6 +48,7 @@
           <!-- Populated by character options read from the savefile -->
         </select>
       </form>
+    
     </section>
 
     <section id="resultSection" style="display: none">
@@ -87,6 +90,18 @@
             onclick="toggleDetailsOpen(this.checked)"
           />
         </label>
+
+        <label for="showFilters">
+          <span id="showFiltersText">
+            Filters
+          </span>
+          <input
+            id="showFilters"
+            type="checkbox"
+            onclick=""
+          />
+        </label>
+
       </form>
 
       <section id="completionProgress">  
