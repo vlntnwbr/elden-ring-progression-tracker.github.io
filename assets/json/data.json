@@ -759,7 +759,7 @@
       "40002AF9": {
         "name": "Greenspill Crystal Tear",
         "type": "chest",
-        "hint": "<ul><li>Mistwood: Found on an altar next to the Minor Erdtree in Mistwood along with the Spiked Cracked Tear. </li><li>.</li></ul>",
+        "hint": "<ul><li>Mistwood: Found on an altar next to the Minor Erdtree in Mistwood along with the Spiked Cracked Tear.</li><li>",
         "multiple": false
       },
       "8000C5A8": {
@@ -1209,6 +1209,12 @@
       }
     },
     "Stormhill Shack": {
+      "40002B0D": {
+        "name": "Strength-Knot Crystal Tear",
+        "type": "chest",
+        "hint": "<ul><li>Head Northeast from Stormhill Shack to the cliffs. Look for a small, stone receptacle on the ground.</li></ul>",
+        "multiple": false
+      },
       "20000816": {
         "name": "Hammer Talisman",
         "type": "invader",
@@ -1627,9 +1633,9 @@
     },
     "Third Church of Marika": {
       "40002AFB": {
-        "name": "Crimson Crystal Tear (2)",
+        "name": "Crimson Crystal Tear (1)",
         "type": "chest",
-        "hint": "<ul><li>In front of the statue in Third Church of Marika. Found on an altar guarded by enemies at the base of the Minor Erdtree in Capital Outskirts.</li></ul>",
+        "hint": "<ul><li>In front of the statue in Third Church of Marika.</li></ul>",
         "multiple": false
       },
       "80004E84": {
@@ -2056,6 +2062,12 @@
         "name": "Shield of the Guilty",
         "type": "chest",
         "hint": "<ul><li>In the cellar area of the Demi-Human Forest Ruins on the Weeping Peninsula, before the main building with the Demi-Human Queen mini-boss. You will need to jump over a wall to access the stairs leading into the cellar.</li></ul>",
+        "multiple": false
+      },
+      "40002B10": {
+        "name": "Faith-Knot Crystal Tear",
+        "type": "chest",
+        "hint": "<ul><li>North of the Demi-Human Forest Ruins. Directly east of the Church of Pilgrimage, just down the cliff. It's in a bowl under a tree and surrounded by poison flower enemies.</li></ul>",
         "multiple": false
       }
     },
@@ -3185,7 +3197,14 @@
         "multiple": false
       }
     },
-    "Boilprawn Shack": {},
+    "Boilprawn Shack": {
+      "40002B0E": {
+        "name": "Dexterity-Knot Crystal Tear",
+        "type": "chest",
+        "hint": "<ul><li>Can be found at the top of a small island at Liurnia of the Lakes. Southwest of Boilprawn Shack.</li></ul>",
+        "multiple": false
+      }
+    },
     "Caria Manor": {
       "40002482": {
         "name": "Glintstone Craftsman's Cookbook [6]",
@@ -3634,7 +3653,7 @@
       "40038658": {
         "name": "Kaiden Sellsword Ashes",
         "type": "boss",
-        "hint": "<ul><li>Where to Find Kaiden Sellsword Ashes: </li><li> Drops from Erdtree Burial Watchdog in Cliffbottom Catacombs.</li></ul>",
+        "hint": "<ul><li>Drops from Erdtree Burial Watchdog in Cliffbottom Catacombs.</li></ul>",
         "multiple": false
       },
       "4000089B": {
@@ -3908,6 +3927,12 @@
         "type": "chest",
         "hint": "<ul><li>Kingsrealm Ruins: Found in a chest inside a small room at the end of the underground area in the northeast. Requires defeating of the Royal Revenant boss in order to access the room.</li></ul>",
         "multiple": false
+      },
+      "40002B0F": {
+        "name": "Intelligence-Knot Crystal Tear",
+        "type": "chest",
+        "hint": "<ul><li>From Road to the Manor Site of Grace, get to the bottom of the cliff (directly East) and follow the cliff's wall North. Guarded by a few Lesser Fingercreepers and one Fingercreeper.</li><li>Note: Despite the map showing a road down from the Main Caria Manor Gate grace point, there is no safe path to reach the knot from here as it's actually a very tall cliff. Instead, if you go to the east side of the nearby Kingsrealm Ruins, you will have a cliff that is at a low enough height to safely drop from.</li></ul>",
+        "multiple": false
       }
     },
     "Lakeside Crystal Cave": {
@@ -3970,13 +3995,13 @@
       "40002AFC": {
         "name": "Cerulean Crystal Tear (1)",
         "type": "boss",
-        "hint": "<ul><li>One dropped by the Erdtree Avatar that resides in Liurnia of the Lakes. One dropped by the Erdtree Avatar guarding the Minor Erdtree (Mountaintops East). </li><li>.</li></ul>",
+        "hint": "<ul><li>Drops from the Erdtree Avatar that resides in Liurnia of the Lakes.</li><li>.</li></ul>",
         "multiple": false
       },
       "40002B08": {
         "name": "Ruptured Crystal Tear (1)",
         "type": "boss",
-        "hint": "<ul><li>Dropped by the Erdtree Avatar that resides in Liurnia of the Lakes. Dropped by the Putrid Avatar at the Minor Erdtree in the Consecrated Snowfield, east of Ordina, Liturgical Town.</li></ul>",
+        "hint": "<ul><li>Dropped by the Erdtree Avatar that resides in Liurnia of the Lakes.</li></ul>",
         "multiple": false
       }
     },
@@ -3984,7 +4009,7 @@
       "40002B16": {
         "name": "Lightning-Shrouding Cracked Tear",
         "type": "boss",
-        "hint": "<ul><li>Dropped by Erdtree Avatar in Minor Erdtree (Liurnia Northeast) in Northeastern Liurnia of the Lakes.  </li><li>.</li></ul>",
+        "hint": "<ul><li>Dropped by Erdtree Avatar in Minor Erdtree (Liurnia Northeast) in Northeastern Liurnia of the Lakes.</li><li>",
         "multiple": false
       },
       "40002B15": {
@@ -4835,7 +4860,7 @@
       "40002B07": {
         "name": "Windy Crystal Tear",
         "type": "chest",
-        "hint": "<ul><li>The item can be found in Caelid in a pit southeast of the Nomadic Merchant. One of the birds watches over it, facing south.</li><li></li><li></li></ul>",
+        "hint": "<ul><li>The item can be found in Caelid in a pit southeast of the Nomadic Merchant. One of the birds watches over it, facing south.</li></ul>",
         "multiple": false
       },
       "100B2390": {
@@ -6185,15 +6210,15 @@
       "4003C0F0": {
         "name": "Soldjars of Fortune Ashes",
         "type": "boss",
-        "hint": "<ul><li>Where to Find Soldjars of Fortune Ashes </li><li> Dropped by the Grave Warden Duelist (boss) in the Auriza Side Tomb located in the eastern part of the Capital Outskirts.</li></ul>",
+        "hint": "<ul><li>Where to Find Soldjars of Fortune Ashes</li><li>Dropped by the Grave Warden Duelist (boss) in the Auriza Side Tomb located in the eastern part of the Capital Outskirts.</li></ul>",
         "multiple": false
       }
     },
     "Capital Outskirts": {
       "40002AFA": {
-        "name": "Crimson Crystal Tear (1)",
+        "name": "Crimson Crystal Tear (2)",
         "type": "chest",
-        "hint": "<ul><li>In front of the statue in Third Church of Marika. Found on an altar guarded by enemies at the base of the Minor Erdtree in Capital Outskirts.</li></ul>",
+        "hint": "<ul><li>Found on an altar guarded by enemies at the base of the Minor Erdtree in Capital Outskirts.</li></ul>",
         "multiple": false
       },
       "800054C4": {
@@ -8982,7 +9007,7 @@
       "40002AFD": {
         "name": "Cerulean Crystal Tear (2)",
         "type": "boss",
-        "hint": "<ul><li>One dropped by the Erdtree Avatar that resides in Liurnia of the Lakes. One dropped by the Erdtree Avatar guarding the Minor Erdtree (Mountaintops East). </li><li>.</li></ul>",
+        "hint": "<ul><li>Drops from the Erdtree Avatar guarding the Minor Erdtree (Mountaintops East).</li><li>",
         "multiple": false
       }
     },
@@ -9602,7 +9627,7 @@
       "40002B09": {
         "name": "Ruptured Crystal Tear (2)",
         "type": "boss",
-        "hint": "<ul><li>Dropped by the Erdtree Avatar that resides in Liurnia of the Lakes. Dropped by the Putrid Avatar at the Minor Erdtree in the Consecrated Snowfield, east of Ordina, Liturgical Town.</li></ul>",
+        "hint": "<ul><li>Dropped by the Putrid Avatar at the Minor Erdtree in the Consecrated Snowfield, east of Ordina, Liturgical Town.</li></ul>",
         "multiple": false
       },
       "01145630": {
