@@ -5,7 +5,16 @@ let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
 
 /*
 TODO: if only one save slot is read from the file, automatically calculate progression
-TODO: Add the quantities of found items to the itemCard
+
+
+TODO: add a filter to exclude entries for specific item "type" (from data)
+- boss
+- chest
+- foe
+- invader
+- merchant
+- quest
+- scarab
 */
 
 /*---
@@ -27,9 +36,7 @@ TODO: Add the quantities of found items to the itemCard
  *                           details summary.
  * @returns {string} An HTML string for a collapsible section summarizing items.
  */
-const ItemSummarySection = (
-    kind, name, found, total, details, icons
-) => (`
+const ItemSummarySection = ( kind, name, found, total, details, icons ) => (`
     <details
       id="${name.replace(" ", "-").toLowerCase()}-${found}-${total}"
       class="${found == total ? "completed" : "in-progress"}"
@@ -271,10 +278,22 @@ function findItemQuantities(slot) {
                 && slot[i + 1] === item.id[1]
                 && slot[i + 2] === item.id[2]
                 && slot[i + 3] === 176
-            ) { result[j] = slot[i + 4];}
+            ) {
+                console.log("findItemQuantities:", item.name, slot.slice(i, i+5));
+                result[j] = slot[i + 4];
+            }
         }
     }
     return result;
+}
+
+class SaveFileSlot {
+    constructor (characterName) {
+        this.characterName = characterName
+        this.rawData = null;
+        this.inventoryArray = null;
+        this.itemList = null;
+    }
 }
 
 class SaveFileReader {
@@ -412,6 +431,7 @@ class SaveFileReader {
         const inventorySlot = this.slots[character];
         if (!inventorySlot) throw error("slot was not found in savefile content");
         const inventoryArray = this.#getInventoryArray(inventorySlot);
+        console.log(inventoryArray, inventoryArray.constructor);
         return this.#getItemsFromInventory(inventoryArray);
     }
 
@@ -467,6 +487,13 @@ class SaveFileReader {
             while (decodedChar.length < 2) decodedChar = "0" + decodedChar;
             decodedId += decodedChar;
         })
+        let quantity = "";
+        id.slice(4, 8).reverse().forEach(quantityPart => {
+            let part = quantityPart.toString();
+            while (part.lengthy < 2) part = "0" + part;
+            quantity += part;
+        })
+        console.log(`SaveFileReader.getHexID: ${decodedId.toUpperCase()}: ${parseInt(quantity)}`, id);
         return decodedId.toUpperCase();
     }
 }
