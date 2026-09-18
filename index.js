@@ -1,4 +1,4 @@
-const VERSION = { major: 2, minor: 2, patch: 0 };
+const VERSION = { major: 2, minor: 2, patch: 1 };
 
 const SHOW_ITEM_CATEGORIES = new Set([
     "boss",
@@ -800,7 +800,7 @@ function updateItemFilters(category, checked) {
 */
 function toggleDetailsOpen(value) {
     document.querySelectorAll("details").forEach(section => section.open = value);
-    document.getElementById("detailsToggleAction").innerText = value ? "Collapse" : "Expand";
+    document.getElementById("detailsToggleAction").innerText = value ? "\u{F0AA6}" : "\u{F0AB4}";
 }
 
 /* --- Main Entry Point ---*/

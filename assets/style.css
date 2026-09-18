@@ -1,3 +1,10 @@
+@font-face {
+    font-family: "MDI";
+    src: url("fonts/materialdesignicons-webfont.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     --primary-text-color: rgb(206, 196, 178);
     --secondary-text-color: rgb(100, 100, 100);
@@ -12,6 +19,10 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
     margin: 0;
+}
+
+.icon-text {
+    font-family: "MDI";
 }
 
 a {
