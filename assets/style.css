@@ -1,0 +1,280 @@
+body {
+    --primary-text-color: rgb(206, 196, 178);
+    --secondary-text-color: rgb(100, 100, 100);
+    --primary-background-color: rgba(0, 0, 0, 0.7);
+    --disabled-background-color: rgba(100, 100, 100, 0.3);
+    --primary-side-margin: 15%;
+    --default-radius: 4px;
+    background-image: url("./images/back.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+a {
+    color: var(--primary-text-color);
+}
+
+header {
+    width: 100%;
+    text-align: center;
+}
+
+.logo {
+    height: 200px;
+}
+
+.title {
+    font-size: xxx-large;
+    margin-top: -1em;
+}
+
+main {
+    background-color: var(--primary-background-color);
+    margin-left: 15%;
+    margin-right: 15%;
+    border-radius: var(--default-radius);
+    color: var(--primary-text-color);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: xx-large;
+    text-align: center;
+}
+
+#formSection {
+    text-align: center;
+}
+
+#saveFileLabel {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0.5em;
+    border-radius: var(--default-radius);
+    border: 1pt solid var(--primary-background-color);
+    background-color: var(--disabled-background-color);
+}
+
+#saveFileLabelText {
+    font-size: small;
+}
+
+#formSection h3,
+#saveFileLabelText strong {
+    font-size: medium;
+}
+
+#resultSection {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-x: visible;
+}
+
+#characterSelectInput {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0.5em;
+    border-radius: var(--default-radius);
+    border: 1pt solid var(--primary-background-color);
+    background-color: var(--disabled-background-color);
+    color: var(--primary-text-color);
+}
+
+#characterSelectInput option {
+    background-color: #1c1c1c;
+}
+
+form#viewModifiers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.5em 0;
+    margin-bottom: 1rem;
+    background-color: var(--primary-background-color);
+    border-radius: var(--default-radius);
+}
+
+form#viewModifiers label {
+    color: var(--primary-text-color);
+    background-color: var(--disabled-background-color);
+    padding: 4pt 8pt;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+form#viewModifiers label:has(input:checked) {
+    color: var(--secondary-text-color);
+    background-color: var(--primary-text-color);
+}
+
+form#viewModifiers input {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+#completionProgress {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-text-color) var(--primary-background-color);
+    position: relative;
+    flex: 1;
+    overflow-y: auto;
+}
+
+details summary {
+    font-size: x-large;
+    cursor: pointer;
+}
+
+details summary .sectionHeading {
+    display: inline
+}
+
+details summary h3 {
+    font-size: x-large;
+}
+
+details summary h4 {
+    font-size: large;
+}
+
+summary.regionTitle {
+    margin-top: 0.25em;
+}
+
+summary.zoneTitle {
+    margin-top: 0.25em;
+    margin-left: 1.2em;
+}
+
+.iconList {
+    margin-left: 8px;
+}
+
+.iconList img {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    background-color: var(--primary-background-color);
+    border-radius: 50%;
+}
+
+.counter {
+    font-size: 18px;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+summary.regionTitle + div.itemList {
+    margin-left: 1.7em;
+}
+
+summary.zoneTitle + div.itemList {
+    margin-left: 3.4em;
+}
+
+div.itemList {
+    margin-top: 0.25em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.itemCard {
+    background-color: var(--primary-background-color);
+    border-radius: var(--default-radius);
+    width: 120px;
+    height: 160px;
+    padding: 5px;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 4px;
+    position: static;
+}
+
+.itemCard a {
+    text-decoration: none;
+}
+
+.itemCard img {
+    width: 100px;
+}
+
+.itemCard h5 {
+    margin: 0;
+}
+
+.itemCard p {
+    margin: 0;
+    font-size: smaller;
+}
+
+.disabledCard {
+    background-color: var(--disabled-background-color);
+    opacity: 1;
+}
+
+.disabledCard img {
+    opacity: 0.5;
+}
+
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip h5 {
+    border-bottom: 1px dotted black;
+}
+
+.tooltip-text {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    width: 240px;
+    padding: 5px 10px;
+    border-radius: var(--default-radius);
+    background-color: black;
+    text-align: justify;
+    font-size: smaller;
+    z-index: 1;
+    left: 50%;
+    top: 90%;
+    transform: translateX(-50%);
+    transition: opacity 0.2s;
+}
+
+.tooltip-text ul {
+    padding-left: 15px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+footer {
+    text-align: center;
+    background-color: var(--primary-background-color);
+    margin: 2em var(--primary-side-margin);
+    border-radius: var(--default-radius);
+    color: var(--primary-text-color);
+    padding: 20px;
+}
