@@ -62,10 +62,11 @@
         role="toolbar"
         aria-label="view-modifiers"
       >
-        <label for="showMissingItemDetails">
-          <span>
-            Item Details
-          </span>
+        <label
+          for="showMissingItemDetails"
+          title="Toggle visibility of details for missing items"
+        >
+          Item Details
           <input
             id="showMissingItemDetails"
             type="checkbox"
@@ -73,10 +74,11 @@
           />
         </label>
 
-        <label for="showOnlyNotFound">
-          <span>
-            Missing Items Only
-          </span>
+        <label
+          for="showOnlyNotFound"
+          title="Toggle visibility of items the character has collected"
+        >
+          Missing Items Only
           <input
             id="showOnlyNotFound"
             type="checkbox"
@@ -84,14 +86,20 @@
           />
         </label>
         
-        <label for="showItems[foe]">
-          Farm-Only Items
+        <label
+          for="showItems[foe]"
+          title="Toggle visibility of items obtained through farming"
+          class="icon-text"
+        >
+          &#xF076E;
         </label>
 
-        <label for="showFilters">
-          <span id="showFiltersText" class="icon-text">
-            &#xF1AA3;
-          </span>
+        <label
+          for="showFilters"
+          title="Show advanced filter options"
+          class="icon-text"
+        >
+          &#xF1AA3;
           <input
             id="showFilters"
             type="checkbox"
@@ -99,24 +107,39 @@
           />
         </label>
 
-
-        <label id="detailsToggle" for="expandSections">
-          <span id="detailsToggleAction" class="icon-text">
-            &#xF0AB4;
-          </span>
+        <label
+          for="expandSections"
+          title="Expand all sections"
+          class="icon-text"
+        >
+          &#xF0AB4;
           <input
             id="expandSections"
-            type="checkbox"
-            onclick="toggleDetailsOpen(this.checked)"
+            type="button"
+            onclick="toggleDetailsOpen(true)"
+          />
+        </label>
+
+        <label
+          for="collapseSections"
+          title="Collapse all sections"
+          class="icon-text"
+        >
+          &#xF0AA6;
+          <input
+            id="collapseSections"
+            type="button"
+            onclick="toggleDetailsOpen(false)"
           />
         </label>
 
         <div id="filterSection" style="display: none;">
 
-          <label for="showItems[boss]">
-            <span>
-              Boss
-            </span>
+          <label
+            for="showItems[boss]"
+            title="Items dropped by Boss enemies (excluding rewards from Remembrances)"
+          >
+            Boss
             <input
               type="checkbox"
               id="showItems[boss]"
@@ -125,10 +148,11 @@
             />
           </label>
 
-          <label for="showItems[chest]">
-            <span>
-              Chest
-            </span>
+          <label
+            for="showItems[chest]"
+            title="Items obtained through NPC interactions or looted from chests, bodies, etc..."
+          >
+            Chest
             <input
               type="checkbox"
               id="showItems[chest]"
@@ -137,10 +161,11 @@
             />
           </label>
 
-          <label for="showItems[foe]">
-            <span>
-              Foe
-            </span>
+          <label
+            for="showItems[foe]"
+            title="Items obtained through farming"
+          >
+            Foe
             <input
               type="checkbox"
               id="showItems[foe]"
@@ -149,7 +174,10 @@
             />
           </label>
 
-          <label for="showItems[invader]">
+          <label
+            for="showItems[invader]"
+            title="Items obtained by defeating an NPC invader"
+          >
             <span>
               Invader
             </span>
@@ -161,10 +189,11 @@
             />
           </label>
 
-          <label for="showItems[merchant]">
-            <span>
-              Merchant
-            </span>
+          <label
+            for="showItems[merchant]"
+            title="Items purchased from merchants (including Boss Remembrances)"
+          >
+            Merchant
             <input
               type="checkbox"
               id="showItems[merchant]"
@@ -173,10 +202,11 @@
             />
           </label>
 
-          <label for="showItems[quest]">
-            <span>
-              Quest
-            </span>
+          <label
+            for="showItems[quest]"
+            title="Items obtained as rewards for progressing an NPC's quest"
+          >
+            Quest
             <input
               type="checkbox"
               id="showItems[quest]"
@@ -185,10 +215,11 @@
             />
           </label>
 
-          <label for="showItems[scarab]">
-            <span>
-              Scarab
-            </span>
+          <label
+            for="showItems[scarab]"
+            title="Items obtained by destroying Teardrop Scarabs"
+          >
+            Scarab
             <input
               type="checkbox"
               id="showItems[scarab]"

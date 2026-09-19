@@ -1,33 +1,23 @@
-const VERSION = { major: 2, minor: 2, patch: 1 };
+const VERSION = { major: 2, minor: 3, patch: 0 };
 
-const SHOW_ITEM_CATEGORIES = new Set([
-    "boss",
-    "chest",
-    "foe",
-    "invader",
-    "merchant",
-    "quest",
-    "scarab",
-])
-
-let COLLECTIBLES_DATA;          // Global Store for assets/data/collectibles.json
-let ITEM_DATA = {};             // Global Store for assets/data/(dlc?)data.json
+let COLLECTIBLES_DATA;          // Global Store for data/allCollectibles.json
+let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegion.json
 
 /*
-TODO: if only one save slot is read from the file, automatically calculate progression
+TODO: hide expandSections button if all sections are expanded
+TODO: hide collapseSections button if all sections are collapsed
 
-TODO: when a single section was expanded the view modifier needs to turn into "Collapse"
+TODO: CONSOLIDATE FILTER LOGIC
+  - make the "missing items only" filter part of the advanced filters (like foe items)
 
+TODO: IMPROVE USER EXPERIENCE FOR FILTERING
+    - have the filter menu always show when a filter is applied
+    - whenever a filter is applied that means the "showFilters" checkbox must be checked
 
-TODO: make the "missing items only" filter aware of the "type" filter
-TODO: make the "type" filter aware of the "missing items only" filter
-- quest
-- scarab
+TODO: after updating the view make sure to hide all sections without visible children
 */
 
-/*---
-    HTML Templates filled by the result of savefile analysis
----*/
+/*--- HTML Templates filled by the result of savefile analysis ---*/
 
 /**
  * Creates a details element with progress tracking.
@@ -115,9 +105,7 @@ const ItemCard = (name, type, id, hint, found = true, url = "") => {
     </article>
 `)};
 
-/*---
-    Helpers for sanitizing Item Data for use in HTML
----*/
+/*--- Helpers for sanitizing Item Data for use in HTML ---*/
 
 function sanitizeURL(name) {
     if (name === "Gauntlets")
@@ -152,7 +140,6 @@ function sanitizeImgName(name) {
 
 class Item {
 
-    // TODO add quantities
     static NOT_FOUND_NAME = "??????????";
     
     constructor(key, item, inventory) {
@@ -272,9 +259,7 @@ function getCollectibles(slot) {
     return [itemsFound, totalItems, entry]
 }
 
-/*--
-    File Reading functions
---*/
+/*-- File Reading functions --*/
 
 function findItemQuantities(slot) {
     const result = new Array(COLLECTIBLES_DATA.length).fill(0);
@@ -565,9 +550,14 @@ class CharacterSelectForm {
      * @param {Object} characterNames Array of character names for creating options
     */
     init(characterNames) {
+        if (!characterNames) return;
         characterNames.forEach( name => this.#addOption(name) );
-        this.#selectFromQuery();
-        this.show();
+        if (characterNames.length > 1) {
+            this.#selectFromQuery(this.queryInput);
+            this.show();
+        } else {
+            this.#selectFromQuery(characterNames[0])
+        }
     }
 
     /** Set inline style attribute of HTML form to `block` */
@@ -596,10 +586,10 @@ class CharacterSelectForm {
     /** Get array with all options of the select form */
     #getOptions() { return Array.from(this.#getInputElement().options); }
 
-    #selectFromQuery() {
-        if (!this.queryInput) return;
+    #selectFromQuery(value) {
+        if (!value) return;
         const characterOption = this.#getOptions().find( option =>
-            option.text.trim() === this.queryInput.trim()
+            option.text.trim() === value.trim()
         );
         if (!characterOption) {
             console.warn("CharacterSelectForm: cannot find slot for", this.queryInput);

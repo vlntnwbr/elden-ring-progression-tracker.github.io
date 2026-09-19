@@ -141,8 +141,10 @@ label[for="showItems[foe]"] {
 }
 
 #filterSection::before {
-    content: "";
+    text-align: center;
+    content: "These filters are a convenience for hunting specific items and have no effect on completion.";
     flex-basis: 100%;
+    padding: 0 2em;
 }
 
 #filterSection label {
