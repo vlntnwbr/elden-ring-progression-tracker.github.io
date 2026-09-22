@@ -5,6 +5,10 @@
     font-style: normal;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     --primary-text-color: rgb(206, 196, 178);
     --secondary-text-color: rgb(100, 100, 100);
@@ -138,6 +142,10 @@ form#viewModifiers:has(#showItems\[foe\]:checked)
 label[for="showItems[foe]"] {
     color: var(--primary-background-color);
     background-color: var(--primary-text-color);
+}
+
+#filterSection {
+    display: contents;
 }
 
 #filterSection::before {

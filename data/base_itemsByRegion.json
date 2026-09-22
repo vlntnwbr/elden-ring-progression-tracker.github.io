@@ -338,12 +338,6 @@
         "hint": "<ul><li>Dropped by Demi-Human Chief, located in Coastal Cave, western Limgrave.</li></ul>",
         "multiple": true
       },
-      "1009770C": {
-        "name": "Prophet Trousers",
-        "type": "merchant",
-        "hint": "<ul><li>Starting Equipment for the Prophet Class.</li><li>Can be purchased from Hermit Merchant at Hermit Merchant's Shack for 1,000 Runes.</li></ul>",
-        "multiple": true
-      },
       "40001FE3": {
         "name": "Tailoring Tools",
         "type": "boss",
@@ -1632,7 +1626,7 @@
       }
     },
     "Third Church of Marika": {
-      "40002AFB": {
+      "40002AFA": {
         "name": "Crimson Crystal Tear (1)",
         "type": "chest",
         "hint": "<ul><li>In front of the statue in Third Church of Marika.</li></ul>",
@@ -1676,12 +1670,6 @@
         "hint": "<ul><li>Sold by Knight Bernahl at the Warmaster's Shack for 800 . Can be purchased from Twin Maiden Husks at the Roundtable Hold after giving them Bernahl's Bell Bearing.</li></ul>",
         "multiple": false
       },
-      "800050DC": {
-        "name": "Ash of War: Eruption",
-        "type": "merchant",
-        "hint": "<ul><li>Sold by Knight Bernahl in Volcano Manor for 8000 .</li></ul>",
-        "multiple": false
-      },
       "8000C47C": {
         "name": "Ash of War: Kick",
         "type": "merchant",
@@ -1698,12 +1686,6 @@
         "name": "Ash of War: War Cry",
         "type": "merchant",
         "hint": "<ul><li>Sold by Knight Bernahl at the Warmaster's Shack for 800 . Can be purchased from Twin Maiden Husks at the Roundtable Hold after giving them Bernahl's Bell Bearing.</li></ul>",
-        "multiple": false
-      },
-      "8000EB28": {
-        "name": "Ash of War: Assassin's Gambit",
-        "type": "merchant",
-        "hint": "<ul><li>Sold by Knight Bernahl in Volcano Manor for 6500 . Note that you will need to fulfill the first contract at Volcano Manor to have access to Knight Bernahl's shop.</li></ul>",
         "multiple": false
       },
       "800078B4": {
@@ -2203,8 +2185,8 @@
       },
       "00116520": {
         "name": "Bloodstained Dagger",
-        "type": "boss",
-        "hint": "<ul><li>Rare drop from Demi-Human Chiefs  There is a Demi-Human Chief sleeping before the wooden bridge leading to the Minor Erdtree in the weeping peninsula. There are 2 of them close to each other in the Hermit Village. A quick way to farm is going to Primeval Sorcerer Azur grace, hugging the wall while going south and there will be one of them isolated. Kill that one and there is one immediately to the side away from the wall.</li></ul>",
+        "type": "foe",
+        "hint": "<ul><li>Rare drop from Demi-Human Chiefs  There is a Demi-Human Chief sleeping before the wooden bridge leading to the Minor Erdtree in the weeping peninsula.</li></ul>",
         "multiple": true
       },
       "01145630": {
@@ -4875,12 +4857,6 @@
         "hint": "<ul><li>Starting Equipment for the Hero Class Can be purchased from the Nomadic Merchant in south Caelid for 1,500 Runes.</li></ul>",
         "multiple": false
       },
-      "001FBD00": {
-        "name": "Nox Flowing Sword",
-        "type": "boss",
-        "hint": "<ul><li>Sellia, Town of Sorcery: Dropped by the Nox Swordstress &amp; Nox Priest boss duo upon defeat.</li></ul>",
-        "multiple": true
-      },
       "80002E7C": {
         "name": "Ash of War: Poison Moth Flight",
         "type": "boss",
@@ -6215,7 +6191,7 @@
       }
     },
     "Capital Outskirts": {
-      "40002AFA": {
+      "40002AFB": {
         "name": "Crimson Crystal Tear (2)",
         "type": "chest",
         "hint": "<ul><li>Found on an altar guarded by enemies at the base of the Minor Erdtree in Capital Outskirts.</li></ul>",
@@ -7714,8 +7690,8 @@
       },
       "00116520": {
         "name": "Bloodstained Dagger",
-        "type": "boss",
-        "hint": "<ul><li>Rare drop from Demi-Human Chiefs  There is a Demi-Human Chief sleeping before the wooden bridge leading to the Minor Erdtree in the weeping peninsula. There are 2 of them close to each other in the Hermit Village. A quick way to farm is going to Primeval Sorcerer Azur grace, hugging the wall while going south and there will be one of them isolated. Kill that one and there is one immediately to the side away from the wall.</li></ul>",
+        "type": "foe",
+        "hint": "<ul><li>Rare drop from Demi-Human Chiefs. There are 2 of them close to each other in the Hermit Village. A quick way to farm is going to Primeval Sorcerer Azur grace, hugging the wall while going south and there will be one of them isolated. Kill that one and there is one immediately to the side away from the wall.</li></ul>",
         "multiple": true
       }
     },
@@ -8146,6 +8122,18 @@
         "name": "Bloodhound Claws",
         "type": "foe",
         "hint": "<ul><li>Bloodhound Claws can be dropped by a Lesser Bloodhound Knight in the basement of the Volcano Manor.</li></ul>",
+        "multiple": false
+      },
+      "800050DC": {
+        "name": "Ash of War: Eruption",
+        "type": "merchant",
+        "hint": "<ul><li>Sold by Knight Bernahl in Volcano Manor after fulfilling the first contract .</li></ul>",
+        "multiple": false
+      },
+      "8000EB28": {
+        "name": "Ash of War: Assassin's Gambit",
+        "type": "merchant",
+        "hint": "<ul><li>Sold by Knight Bernahl in Volcano Manor after fulfilling the first contract.</li></ul>",
         "multiple": false
       }
     },

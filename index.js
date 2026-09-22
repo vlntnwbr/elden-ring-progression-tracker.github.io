@@ -1,9 +1,13 @@
-const VERSION = { major: 2, minor: 3, patch: 0 };
+const VERSION = { major: 2, minor: 3, patch: 1 };
 
 let COLLECTIBLES_DATA;          // Global Store for data/allCollectibles.json
 let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegion.json
 
 /*
+TODO: Evaluate Starting Equipment
+-> Starting Equipment not in the inventory of a character means they are not of that
+   class and have to be obtained the alternative way listed in the wiki
+
 TODO: hide expandSections button if all sections are expanded
 TODO: hide collapseSections button if all sections are collapsed
 
@@ -504,16 +508,16 @@ class FileUploadForm {
     }
 
     /** Remove the inline style attribute of the HTML form */
-    show() { this.#setVisibility(""); }
+    show() { this.#setVisibility(true); }
 
     /** Set inline style attribute of HTML form to `none` */
-    hide() { this.#setVisibility("none"); }
+    hide() { this.#setVisibility(false); }
 
     /** Set inline style attribute of HTML form
      * @param {string} display a valid value for the css display attribute
     */
     #setVisibility(display) {
-        document.getElementById("saveFileUploadForm").style.display = display;
+        document.getElementById("saveFileUploadForm").hidden = display;
     }
 
     /**
@@ -561,16 +565,16 @@ class CharacterSelectForm {
     }
 
     /** Set inline style attribute of HTML form to `block` */
-    show() { this.#setVisibility("block"); }
+    show() { this.#setVisibility(true); }
 
     /** Set inline style attribute of HTML form to `none` */
-    hide() { this.#setVisibility("none"); }
+    hide() { this.#setVisibility(false); }
 
     /** Set inline style attribute of HTML form
      * @param {string} display a valid value for the css display attribute
     */
     #setVisibility(display) {
-        document.getElementById("characterSelectForm").style.display = display;
+        document.getElementById("characterSelectForm").hidden = display;
     }
     
     #getInputElement() { return document.getElementById("characterSelectInput"); }
@@ -651,8 +655,8 @@ class ProgressTracker {
         this.#setResultHeading(globalCounter, globalTotal);
         // Set content of progress section and show completion results
         document.getElementById("completionProgress").innerHTML = completionProgressHTML;
-        this.#setVisibility("formSection", "none");
-        this.#setVisibility("resultSection", "flex")
+        this.#setVisibility("formSection", false);
+        this.#setVisibility("resultSection", true);
     }
 
     async #onSaveFileUpload(event) {
@@ -684,7 +688,7 @@ class ProgressTracker {
     }
 
     #setVisibility(elementId, display) {
-        document.getElementById(elementId).style.display = display;
+        document.getElementById(elementId).hidden = !display;
     }
 
     async #readItemsJSON() {
@@ -768,9 +772,7 @@ function toggleShowOnlyNotFoundItems(value) {
 }
 
 function showItemFilters(checked) {
-    document.getElementById(
-        "filterSection"
-    ).style.display = checked ? "contents" : "none";
+    document.getElementById("filterSection").hidden = !checked;
 }
 
 function updateItemFilters(category, checked) {
@@ -790,7 +792,6 @@ function updateItemFilters(category, checked) {
 */
 function toggleDetailsOpen(value) {
     document.querySelectorAll("details").forEach(section => section.open = value);
-    document.getElementById("detailsToggleAction").innerText = value ? "\u{F0AA6}" : "\u{F0AB4}";
 }
 
 /* --- Main Entry Point ---*/

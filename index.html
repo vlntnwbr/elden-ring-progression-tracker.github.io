@@ -36,12 +36,12 @@
           <input id="saveFileInput"
             type="file"
             accept=".sl2, .co2"
-            style="display: none;"
+            hidden
           />
         </label>
       </form>
 
-      <form style="display: none" id="characterSelectForm">
+      <form hidden id="characterSelectForm">
         <h3 id="selectLabel">Select Character</h3>
         <select aria-labelledby="selectLabel" id="characterSelectInput">
           <option selected><!-- Empty Display-Only Option --></option>
@@ -51,7 +51,7 @@
 
     </section>
 
-    <section id="resultSection" style="display: none">
+    <section id="resultSection" hidden>
 
       <h2 id="globalCompletion">
         <!-- Character Name • Completion % -->
@@ -133,7 +133,7 @@
           />
         </label>
 
-        <div id="filterSection" style="display: none;">
+        <div id="filterSection" hidden>
 
           <label
             for="showItems[boss]"
@@ -233,9 +233,7 @@
       </form>
 
       <section id="completionProgress">
-        <!-- Populated with the savefile analysis results
-         TODO: make this the <dl> wrapper
-        -->
+        <!-- Populated with the savefile analysis results -->
       </section>
     </section>
 
