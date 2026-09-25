@@ -4792,6 +4792,30 @@
         "type": "chest",
         "hint": "<ul><li>Can be found at Village of the Albinaurics. Past the well and the wooden bridge, on a body near the edge.</li></ul>",
         "multiple": false
+      },
+      "10083E28": {
+        "name": "Depraved Perfumer Gloves",
+        "type": "foe",
+        "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
+        "multiple": true
+      },
+      "10083D60": {
+        "name": "Depraved Perfumer Headscarf",
+        "type": "foe",
+        "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
+        "multiple": true
+      },
+      "10083E8C": {
+        "name": "Depraved Perfumer Trousers",
+        "type": "foe",
+        "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
+        "multiple": true
+      },
+      "10083DC4": {
+        "name": "Depraved Perfumer Robe",
+        "type": "foe",
+        "hint": "<ul><li>Acquire this from the enemy directly up the hill from the site of grace at the Village of the Albinaurics. He is the enemy who wields fire, you may have to kill him a few times to get it. The Depraved Perfumer Set can also be farmed from the Depraved Perfumer enemies located around The Shaded Castle.</li></ul>",
+        "multiple": true
       }
     }
   },
@@ -7185,13 +7209,13 @@
         "name": "Depraved Perfumer Gloves",
         "type": "foe",
         "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
-        "multiple": false
+        "multiple": true
       },
       "10083D60": {
         "name": "Depraved Perfumer Headscarf",
         "type": "foe",
         "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
-        "multiple": false
+        "multiple": true
       },
       "003010B0": {
         "name": "Marais Executioner's Sword",
@@ -7209,7 +7233,7 @@
         "name": "Depraved Perfumer Trousers",
         "type": "foe",
         "hint": "<ul><li>The Depraved Perfumer Set pieces can be farmed from the Depraved Perfumer enemies located around The Shaded Castle. The best place to farm this set is in Liurnia of the Lakes near the Village of the Albinaurics Site of Grace. There is one Depraved Perfumer enemy a short distance up the hill to the East.</li></ul>",
-        "multiple": false
+        "multiple": true
       },
       "10035BC4": {
         "name": "Page Garb",
@@ -7221,7 +7245,7 @@
         "name": "Depraved Perfumer Robe",
         "type": "foe",
         "hint": "<ul><li>Acquire this from the enemy directly up the hill from the site of grace at the Village of the Albinaurics. He is the enemy who wields fire, you may have to kill him a few times to get it. The Depraved Perfumer Set can also be farmed from the Depraved Perfumer enemies located around The Shaded Castle.</li></ul>",
-        "multiple": false
+        "multiple": true
       },
       "0262A820": {
         "name": "Red Branch Shortbow",
