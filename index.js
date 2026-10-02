@@ -1,4 +1,4 @@
-const VERSION = { major: 2, minor: 3, patch: 2 };
+const VERSION = { major: 2, minor: 3, patch: 3 };
 
 let COLLECTIBLES_DATA;          // Global Store for data/allCollectibles.json
 let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegion.json
@@ -305,6 +305,8 @@ class SaveFileReader {
 
     async setContent(file) { return new Promise((resolve, reject) => {
         console.info("SaveFileReader: reading file contents")
+        this.slots = {};
+        this.dlcFile = false;
         const reader = new FileReader();
         // Set the handler for successfully reading file contents
         reader.onload = e => {
@@ -411,9 +413,10 @@ class SaveFileReader {
             slot.inventory[0], slot.inventory[1] + 1
         )
         // Populate save slots array
-        saveSlotLocations.forEach(slot =>
-            this.slots[getName(slot)] = getInventory(slot)
-        );
+        saveSlotLocations.forEach(slot =>{
+            let name = getName(slot)
+            if (name) { this.slots[name] = getInventory(slot) };
+        });
     }
 
     fetchInventory(character) {
@@ -502,7 +505,7 @@ class FileUploadForm {
     /** Create the final form with runtime data */
     init() {
         if (!this.#getFile()) return;
-        this.setLabel();
+        this.setLabel("default");
         this.#getInputElement().dispatchEvent(new Event("change"));
         this.show();
     }
@@ -545,6 +548,8 @@ class CharacterSelectForm {
     constructor(selectCharacter, onChange) {
         this.queryInput = selectCharacter;
         this.#getInputElement().addEventListener("change", onChange);
+        this._defaultForm = this.#getInputElement();
+        this.initialized = false;
     }
     
     /** Create the final form with runtime data.
@@ -554,7 +559,9 @@ class CharacterSelectForm {
      * @param {Object} characterNames Array of character names for creating options
     */
     init(characterNames) {
+        console.info("CharacterSelectForm: compiling options", characterNames);
         if (!characterNames) return;
+        if (this.initialized) this.#clearOptions();
         characterNames.forEach( name => this.#addOption(name) );
         if (characterNames.length > 1) {
             this.#selectFromQuery(this.queryInput);
@@ -564,17 +571,14 @@ class CharacterSelectForm {
         }
     }
 
-    /** Set inline style attribute of HTML form to `block` */
-    show() { this.#setVisibility(true); }
+    show() { document.getElementById("characterSelectForm").hidden = false; }
+    hide() { document.getElementById("characterSelectForm").hidden = true; }
 
-    /** Set inline style attribute of HTML form to `none` */
-    hide() { this.#setVisibility(false); }
-
-    /** Set inline style attribute of HTML form
-     * @param {string} display a valid value for the css display attribute
+    /** Show or Hide the HTML element
+     * @param {boolean} display the value used for determining the hidden state
     */
     #setVisibility(display) {
-        document.getElementById("characterSelectForm").hidden = display;
+        document.getElementById("characterSelectForm").hidden = !display;
     }
     
     #getInputElement() { return document.getElementById("characterSelectInput"); }
@@ -582,9 +586,18 @@ class CharacterSelectForm {
     /** Append an option for the given character name to the select form */
     #addOption(character) {
         if (!character) return;
+        this.initialized = true;
         const option = document.createElement("option");
         option.text = character;
         this.#getInputElement().appendChild(option);
+    }
+
+    #clearOptions() {
+        const select = this.#getInputElement();
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+        this.initialized = false;
     }
 
     /** Get array with all options of the select form */
@@ -663,6 +676,7 @@ class ProgressTracker {
         const upload = event.target.files[0];
         if (!upload) { alert("No file selected"); return; }
         try {
+            this.fileUpload.setLabel()
             await this.saveFile.setContent(upload);
             this.saveFile.setSaveSlots();
             this.characterSelect.init(Object.keys(this.saveFile.slots));
@@ -671,7 +685,6 @@ class ProgressTracker {
             alert(error);
             this.fileUpload.setLabel("default");
         }
-        // this.characterSelect.show();
     }
 
     #onCharacterSelect(event) {
