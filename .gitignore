@@ -1,3 +1,5 @@
 .utils/
+.build/*.tar.gz
+
 savegames/**
 **.py
