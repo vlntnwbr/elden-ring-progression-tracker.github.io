@@ -9,7 +9,9 @@ EXCLUDE_FILES=(
 
 case "$1" in
     github)
-        tar "${EXCLUDE_FILES[@]}" -czvf "elden-ring-progression-tracker.tar.gz" .
+        [[ -z "$2"]] && { echo "error: archive destination undefined." >&2; exit 1; }
+        mkdir -p "$(dirname "$2")"
+        tar "${EXCLUDE_FILES[@]}" -czvf "$2" .
         ;;
     *)
         VERSION=$(sed -n '1,5s/.*major: \([0-9]*\), minor: \([0-9]*\), patch: \([0-9]*\).*/\1.\2.\3/p' index.js)

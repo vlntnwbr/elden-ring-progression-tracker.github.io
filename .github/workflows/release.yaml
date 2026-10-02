@@ -32,7 +32,7 @@ jobs:
           fi
 
       - name: Package
-        run: .build/package.sh github
+        run: .build/package.sh github ".build/elden-ring-progression-tracker.tar.gz"
 
       - name: Create release
         env:
@@ -40,6 +40,6 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           gh release create "$VERSION" \
-            "elden-ring-progression-tracker.tar.gz" \
+            ".build/elden-ring-progression-tracker.tar.gz" \
             --title "v$VERSION" \
             --generate-notes
