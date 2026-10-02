@@ -1,24 +1,20 @@
-const VERSION = { major: 2, minor: 3, patch: 3 };
+const VERSION = { major: 2, minor: 4, patch: 0 };
 
 let COLLECTIBLES_DATA;          // Global Store for data/allCollectibles.json
 let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegion.json
 
 /*
-TODO: Evaluate Starting Equipment
--> Starting Equipment not in the inventory of a character means they are not of that
-   class and have to be obtained the alternative way listed in the wiki
-
 TODO: hide expandSections button if all sections are expanded
 TODO: hide collapseSections button if all sections are collapsed
 
-TODO: CONSOLIDATE FILTER LOGIC
-  - make the "missing items only" filter part of the advanced filters (like foe items)
 
 TODO: IMPROVE USER EXPERIENCE FOR FILTERING
     - have the filter menu always show when a filter is applied
     - whenever a filter is applied that means the "showFilters" checkbox must be checked
 
 TODO: after updating the view make sure to hide all sections without visible children
+
+TODO: add new item itemType for dragon communion and remembrances
 */
 
 /*--- HTML Templates filled by the result of savefile analysis ---*/
@@ -723,19 +719,19 @@ class ProgressTracker {
 /**
  * Toggle display of details for items that were not found in the players inventory.
  * 
- * @param {Boolean} value Show details if `true`, otherwise hide them.
+ * @param {Boolean} showDetails Show details if `true`, otherwise hide them.
  * 
  * When details are shown the regular item name and image are displayed and the link to
  * the Elden Ring wiki  wrapping the card is restored. The tooltip gets an additional
  * hint that clicking the card will open the wiki.
  */
-function toggleMissingItemsDetails(value) {
+function toggleMissingItemsDetails(showDetails) {
     const disabledCardList = document.getElementsByClassName("disabledCard");
     Array.from(disabledCardList).forEach((card) => {
         let itemName = card.dataset.itemName;
         const clickHint = "Click to open the wiki page.";
         const tooltip = () => card.getElementsByTagName("div")[0];
-        if (value) {
+        if (showDetails) {
             card.innerHTML = `
                 <a target="_blank" href="${card.dataset.itemWikiLink}">
                     ${card.innerHTML}
@@ -747,58 +743,81 @@ function toggleMissingItemsDetails(value) {
             card.innerHTML = card.getElementsByTagName("a")[0].innerHTML;
             itemName = Item.NOT_FOUND_NAME;
         }
-        const image = Item.getImageAsset(itemName, card.dataset.itemType, value);
+        const image = Item.getImageAsset(itemName, card.dataset.itemType, showDetails);
         card.getElementsByTagName("img")[0].src = image;
         card.getElementsByTagName("h5")[0].innerText = itemName;
     });
-}
-
-/**
- * Toggle visibility of all elements that only relate to found items.
- * - itemCards that represent items found in the players inventory
- * - itemCards for collectibles that are at the total available amount
- * - Zone sections that are marked as completed
- * - Region sections are marked as completed
- * 
- * @param {Boolean} value hide elements if `true`, otherwise unhide them
- * 
- * Relevant cards are identified by their class names, relevant sections are
- * identified by the class of the details section.
-*/
-function toggleShowOnlyNotFoundItems(value) {
-    const foundItemCards = document.querySelectorAll(
-        ".itemCard:not(.disabledCard):not(.collectible)"
-    );
-    const itemTypeFilters = {}
-    Array.from(foundItemCards).forEach((card) => {
-        const itemType = card.dataset.itemType;
-        itemTypeFilters[itemType] ??= (
-            document.getElementById(`showItems[${itemType}]`).checked
-        );
-        const showItemType = itemTypeFilters[itemType];
-        card.style.display = value || !showItemType ? "none" : "";
-    });
-    const foundCompletedCards = document.querySelectorAll("details.completed");
-    Array.from(foundCompletedCards).forEach(card => 
-        card.style.display = value ? "none" : ""
-    )
 }
 
 function showItemFilters(checked) {
     document.getElementById("filterSection").hidden = !checked;
 }
 
-function updateItemFilters(category, checked) {
-    const missingItemsOnly = document.getElementById("showOnlyNotFound").checked;
+function updateItemFilters(category, showItems) {
+    const showCollected = document.getElementById("showCollected").checked;
+    // if missingItemsOnly is true we need to preserve hiding a card that is not of
+    // class disabledCard (only missing items are of class disabledCard) if card.classList.contains("disabledCard")
+    console.info(`TypeFilter: '${category}' be ${showItems ? "shown" : "hidden"}${
+        showCollected ? " while preserving missing only filter" : ""
+    }`);
     const itemCards = document.querySelectorAll(`.itemCard[data-item-type="${category}"]`);
     itemCards.forEach( card => {
-        if (!checked || (missingItemsOnly && !card.classList.contains("disabledCard"))) {
-            card.style.display = "none";
-        } else {
-            card.style.display = "";
+        card.hidden = !showItems || (
+            !showCollected && !card.classList.contains("disabledCard")
+        );
+    });
+    filterPostProcessing();
+}
+
+function updateCollectedFilter(showCollected) {
+    const foundItemCards = document.querySelectorAll(
+        ".itemCard:not(.disabledCard):not(.collectible)"
+    );
+    const showItemTypes = {}
+    Array.from(foundItemCards).forEach((card) => {
+        const itemType = card.dataset.itemType;
+        showItemTypes[itemType] ??= (
+            document.getElementById(`showItems[${itemType}]`)?.checked
+        );
+        card.hidden = !showCollected || showItemTypes[itemType] === false;
+    });
+    filterPostProcessing();
+}
+
+function filterPostProcessing() {
+    const filterSectionLabel = document.getElementById("showFiltersLabel");
+    const filterSectionInput = document.getElementById("showFilters");
+    const hasActiveFilters = document.querySelector(
+        "#filterSection input[type='checkbox']:not(:checked)"
+    ) !== null;
+    const detailSections = document.querySelectorAll("#completionProgress details");
+    if (!hasActiveFilters) {
+        detailSections.forEach(section => section.hidden = false);
+        filterSectionLabel.title = "Toggle visibility of the filter section";
+        filterSectionInput.disabled = false;
+        filterSectionInput.checked = false;
+        filterSectionInput.dispatchEvent(new Event("click"));
+        return
+    }
+    filterSectionLabel.title = "Disable all filters to hide the filter section"
+    filterSectionInput.checked = true;
+    filterSectionInput.dispatchEvent(new Event("click"));
+    filterSectionInput.disabled = true;
+    Array.from(detailSections).reverse().forEach(section => {
+        const visibleItem = Array.from(
+            section.querySelectorAll(":scope > .itemList > .itemCard")
+        ).some(card => !card.hidden);
+        if (visibleItem) {
+            section.hidden = false;
+            return;
         }
+        const visibleSection = Array.from(
+            section.querySelectorAll(":scope > div > details")
+        ).some(child => !child.hidden);
+        section.hidden = !visibleSection;
     });
 }
+
 
 /** Set the opened state of all details elements 
  * @param {Boolean} value the value to set the opened state to

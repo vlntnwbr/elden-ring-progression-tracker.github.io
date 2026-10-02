@@ -14,16 +14,16 @@
   <link href="assets/style.css" type="text/css" rel="stylesheet" />
   <script type="text/javascript" src="index.js"></script>
 </head>
-<body>
 
+<body>
   <header>
     <img src="assets/images/logo.png" alt="Elden Ring Logo" class="logo" />
     <h1 class="title">Completion Tracker</h1>
   </header>
 
-  <main>
-    <section id="formSection">
+  <main>  
 
+    <section id="formSection">
       <h2>Elden Ring Savefile</h2>
 
       <form id="saveFileUploadForm">
@@ -48,25 +48,22 @@
           <!-- Populated by character options read from the savefile -->
         </select>
       </form>
-
     </section>
 
     <section id="resultSection" hidden>
-
       <h2 id="globalCompletion">
         <!-- Character Name • Completion % -->
       </h2>
 
-      <form
-        id="viewModifiers"
+      <form id="viewModifiers"
         role="toolbar"
         aria-label="view-modifiers"
       >
-        <label
-          for="showMissingItemDetails"
+        <label for="showMissingItemDetails"
           title="Toggle visibility of details for missing items"
+          class="icon-text"
         >
-          Item Details
+          &#xF191F; <!-- mdi: database-eye -->
           <input
             id="showMissingItemDetails"
             type="checkbox"
@@ -74,32 +71,25 @@
           />
         </label>
 
-        <label
-          for="showOnlyNotFound"
+        <label for="showCollected"
           title="Toggle visibility of items the character has collected"
+          class="icon-text"
         >
-          Missing Items Only
-          <input
-            id="showOnlyNotFound"
-            type="checkbox"
-            onclick="toggleShowOnlyNotFoundItems(this.checked)"
-          />
+          &#xF0138; <!-- checkbox-multiple-marked -->
         </label>
         
-        <label
-          for="showItems[foe]"
+        <label for="showItems[foe]"
           title="Toggle visibility of items obtained through farming"
           class="icon-text"
         >
-          &#xF076E;
+          &#xF076E;  <!-- dice-multiple -->
         </label>
 
-        <label
-          for="showFilters"
-          title="Show advanced filter options"
+        <label id="showFiltersLabel" for="showFilters"
+          title="Toggle visibility of the filter section"
           class="icon-text"
         >
-          &#xF1AA3;
+          &#xF1AA3;  <!-- filter-cog -->
           <input
             id="showFilters"
             type="checkbox"
@@ -107,12 +97,11 @@
           />
         </label>
 
-        <label
-          for="expandSections"
+        <label for="expandSections"
           title="Expand all sections"
           class="icon-text"
         >
-          &#xF0AB4;
+          &#xF0AB4;  <!-- expand-all -->
           <input
             id="expandSections"
             type="button"
@@ -120,12 +109,11 @@
           />
         </label>
 
-        <label
-          for="collapseSections"
+        <label for="collapseSections"
           title="Collapse all sections"
           class="icon-text"
         >
-          &#xF0AA6;
+          &#xF0AA6; <!-- collapse-all -->
           <input
             id="collapseSections"
             type="button"
@@ -135,9 +123,20 @@
 
         <div id="filterSection" hidden>
 
-          <label
-            for="showItems[boss]"
-            title="Items dropped by Boss enemies (excluding rewards from Remembrances)"
+          <label for="showCollected"
+            title="Toggle visibility of items the character has collected"
+          >
+            Show Collected Items
+            <input
+              id="showCollected"
+              type="checkbox"
+              onclick="updateCollectedFilter(this.checked)"
+              checked
+            />
+          </label>
+
+          <label for="showItems[boss]"
+            title="Toggle visibility of items dropped by Boss enemies (excluding rewards from Remembrances)"
           >
             Boss
             <input
@@ -148,9 +147,8 @@
             />
           </label>
 
-          <label
-            for="showItems[chest]"
-            title="Items obtained through NPC interactions or looted from chests, bodies, etc..."
+          <label for="showItems[chest]"
+            title="Toggle visibility of items obtained through NPC interactions or looted from chests, corpses, etc..."
           >
             Chest
             <input
@@ -161,9 +159,8 @@
             />
           </label>
 
-          <label
-            for="showItems[foe]"
-            title="Items obtained through farming"
+          <label for="showItems[foe]"
+            title="Toggle visibility of items obtained through farming"
           >
             Foe
             <input
@@ -174,13 +171,10 @@
             />
           </label>
 
-          <label
-            for="showItems[invader]"
-            title="Items obtained by defeating an NPC invader"
+          <label for="showItems[invader]"
+            title="Toggle visibility of items obtained by defeating NPC invaders"
           >
-            <span>
-              Invader
-            </span>
+            Invader
             <input
               type="checkbox"
               id="showItems[invader]"
@@ -189,9 +183,8 @@
             />
           </label>
 
-          <label
-            for="showItems[merchant]"
-            title="Items purchased from merchants (including Boss Remembrances)"
+          <label for="showItems[merchant]"
+            title="Toggle visibility of items sold by merchants (including Boss Remembrances and Dragon Communion Rewards)"
           >
             Merchant
             <input
@@ -202,9 +195,8 @@
             />
           </label>
 
-          <label
-            for="showItems[quest]"
-            title="Items obtained as rewards for progressing an NPC's quest"
+          <label for="showItems[quest]"
+            title="Toggle visibility of items obtained as rewards for progressing an NPC's quest"
           >
             Quest
             <input
@@ -215,9 +207,8 @@
             />
           </label>
 
-          <label
-            for="showItems[scarab]"
-            title="Items obtained by destroying Teardrop Scarabs"
+          <label for="showItems[scarab]"
+            title="Toggle visibility of items obtained by destroying Teardrop Scarabs"
           >
             Scarab
             <input
@@ -234,9 +225,8 @@
 
       <section id="completionProgress">
         <!-- Populated with the savefile analysis results -->
-      </section>
+      </section>    
     </section>
-
   </main>
 
   <footer>

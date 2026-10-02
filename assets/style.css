@@ -131,6 +131,11 @@ form#viewModifiers label:has(input:checked) {
     background-color: var(--primary-text-color);
 }
 
+form#viewModifiers label:has(input:disabled) {
+    cursor: default;
+    filter: brightness(0.75);
+}
+
 form#viewModifiers input {
   position: absolute;
   opacity: 0;
@@ -139,9 +144,17 @@ form#viewModifiers input {
 }
 
 form#viewModifiers:has(#showItems\[foe\]:checked)
-label[for="showItems[foe]"] {
+    > label[for="showItems[foe]"],
+form#viewModifiers:has(#showCollected:checked)
+    > label[for="showCollected"] {
+
     color: var(--primary-background-color);
     background-color: var(--primary-text-color);
+
+}
+
+#filterSection {
+    display: contents;
 }
 
 #filterSection {
