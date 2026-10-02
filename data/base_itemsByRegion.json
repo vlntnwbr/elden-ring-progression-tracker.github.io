@@ -3660,7 +3660,7 @@
         "name": "Imp Head (Fanged)",
         "type": "foe",
         "hint": "<ul><li>Rare drop from Imps with the same head. Can be found at Cliffbottom Catacombs and Wyndham Catacombs. Best place to farm is probably Wynham Catacombs. Kill the boss (allows fast travel back to grace).Go down elevator, send elevator back up, go to next room, kill 2 imps, go to next room, kill 2 imps, fast travel back to grace. Repeat.</li></ul>",
-        "multiple": false
+        "multiple": true
       },
       "10108A60": {
         "name": "Imp Head (Wolf)",
@@ -8232,6 +8232,12 @@
         "name": "Imp Head (Cat)",
         "type": "foe",
         "hint": "<ul><li>Rare drop from Imps. Farming: from the Impaler's Catacombs site of grace, run to the imp at the bottom of the stairs, and after killing this one, run back up and kill the one near the top which is now done climbing; you are close to the grace again.</li></ul>",
+        "multiple": true
+      },
+      "10107EA8": {
+        "name": "Imp Head (Fanged)",
+        "type": "foe",
+        "hint": "<ul><li>Rare drop from Imps with the same head. Can be found at Cliffbottom Catacombs and Wyndham Catacombs. Best place to farm is probably Wynham Catacombs. Kill the boss (allows fast travel back to grace).Go down elevator, send elevator back up, go to next room, kill 2 imps, go to next room, kill 2 imps, fast travel back to grace. Repeat.</li></ul>",
         "multiple": true
       },
       "002E6300": {

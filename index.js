@@ -1,4 +1,4 @@
-const VERSION = { major: 2, minor: 3, patch: 1 };
+const VERSION = { major: 2, minor: 3, patch: 2 };
 
 let COLLECTIBLES_DATA;          // Global Store for data/allCollectibles.json
 let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegion.json
