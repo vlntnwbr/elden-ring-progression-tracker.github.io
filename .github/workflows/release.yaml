@@ -32,7 +32,7 @@ jobs:
           fi
 
       - name: Package
-        run: ./.build/package.sh github
+        run: .build/package.sh github
 
       - name: Create release
         env:
