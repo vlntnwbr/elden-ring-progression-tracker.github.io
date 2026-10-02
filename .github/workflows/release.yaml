@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(sed -n '1,5s/.*major: \([0-9]*\), minor: \([0-9]*\), patch: \([0-9]*\).*/\1.\2.\3/p' index.js)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check release does not exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+              echo "Error: Release $VERSION already exists." >&2
+              exit 1
+          fi
+
+      - name: Package
+        run: ./.build/package.sh github
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            "elden-ring-progression-tracker.tar.gz" \
+            --title "v$VERSION" \
+            --generate-notes
