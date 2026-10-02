@@ -9,7 +9,7 @@ EXCLUDE_FILES=(
 
 case "$1" in
     github)
-        [[ -z "$2"]] && { echo "error: archive destination undefined." >&2; exit 1; }
+        [[ -z "$2" ]] && { echo "error: archive destination undefined." >&2; exit 1; }
         mkdir -p "$(dirname "$2")"
         tar "${EXCLUDE_FILES[@]}" -czvf "$2" .
         ;;
