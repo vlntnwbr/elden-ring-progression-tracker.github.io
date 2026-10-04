@@ -7,14 +7,22 @@ let ITEM_DATA = {};             // Global Store for data/(base|sote)_itemsByRegi
 TODO: hide expandSections button if all sections are expanded
 TODO: hide collapseSections button if all sections are collapsed
 
+TODO: better tooltips using HTML popover functionality
+TODO: implement a clear-filter button
 
-TODO: IMPROVE USER EXPERIENCE FOR FILTERING
-    - have the filter menu always show when a filter is applied
-    - whenever a filter is applied that means the "showFilters" checkbox must be checked
+TODO: Data Cleanup
+    - fix hints (dependent on popover functionality)
+    - add new item itemType for dragon communion and remembrances (with icons)
+    - link map genie / fextra interactive map for collectibles
 
-TODO: after updating the view make sure to hide all sections without visible children
+TODO: implement functionality to change character without reloading the page
+    - reset the "Show Collected Checkbox"
 
-TODO: add new item itemType for dragon communion and remembrances
+TODO: Lord-Mode
+    - needs data cleanup first
+    - should be a slider atop the toolbar Perspective: Lord | Explorer
+    - must be configurable via query parameter
+
 */
 
 /*--- HTML Templates filled by the result of savefile analysis ---*/
